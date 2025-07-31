@@ -1,0 +1,37 @@
+{
+    "name": "vitexsoftware/multiflexi-scheduler",
+    "description": "Shchedule MultiFlexi jobs",
+    "type": "project",
+    "require": {
+        "vitexsoftware/multiflexi-core": "dev-main"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "MultiFlexi\\Scheduler\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "CyberVitexus",
+            "email": "info@vitexsoftware.cz"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require-dev": {
+        "phpunit/phpunit": "*",
+        "phpstan/phpstan": "*",
+        "friendsofphp/php-cs-fixer": "^3.75",
+        "ergebnis/composer-normalize": "^2.47",
+        "ergebnis/php-cs-fixer-config": "^6.46",
+        "phpstan/phpstan-phpunit": "2.0.x-dev",
+        "rector/rector": "dev-main"
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true
+        }
+    }
+
+
+}

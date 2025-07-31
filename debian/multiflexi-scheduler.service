@@ -1,0 +1,14 @@
+[Unit]
+Description=My Service
+After=network.target
+
+[Service]
+User=multiflexi
+Group=multiflexi
+EnvironmentFile=/etc/multiflexi/multiflexi.env
+ExecStart=/usr/bin/php /usr/lib/multiflexi-scheduler/daemon.php
+LimitNOFILE=8192:16384
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

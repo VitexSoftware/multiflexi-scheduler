@@ -1,0 +1,27 @@
+Source: multiflexi-scheduler
+Section: unknown
+Priority: optional
+Maintainer: Vítězslav Dvořák <info@vitexsoftware.cz>
+Build-Depends:
+ debhelper-compat (= 13),
+Standards-Version: 4.7.0
+Homepage: https://multiflexi.eu
+Rules-Requires-Root: no
+Vcs-Git: https://github.com/VitexSoftware/multiflexi-scheduler.git
+Vcs-Browser: https://github.com/VitexSoftware/multiflexi-scheduler
+
+Package: multiflexi-scheduler
+Architecture: any
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+ multiflexi-database,
+ php-vitexsoftware-multiflexi-core
+Description: Shchedule MultiFlexi jobs
+ MultiFlexi Scheduler is a tool designed to automate and manage the scheduling of
+ MultiFlexi jobs. It enables users to define, queue, and execute tasks in a flexible
+ and efficient manner, supporting integration with various backends and databases.
+ The scheduler is suitable for environments where reliable and customizable job execution
+ is required, providing logging, error handling, and monitoring capabilities to ensure smooth
+ operation of scheduled processes.
