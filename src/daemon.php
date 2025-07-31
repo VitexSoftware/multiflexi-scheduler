@@ -92,7 +92,7 @@ function scheduleIntervalJobs(string $interval): void
                     $jobber->addStatusMessage('Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
                 }
 
-                $jobber->prepareJob($runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
+                $jobber->prepareJob((int)$runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
                 $jobber->scheduleJobRun($startTime);
                 $jobber->addStatusMessage('🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
             }
@@ -143,12 +143,12 @@ do {
         $tomorrow = (clone $now)->modify('+1 day');
 
         if ((int) $tomorrow->format('j') === 1) { // Monthly
-            $nextMonth = (new DateTime('first day of next month'))->setTime(0, 0, 0);
+            $nextMonth = (new \DateTime('first day of next month'))->setTime(0, 0, 0);
             scheduleIntervalJobs('m');
         }
 
         if ((int) $tomorrow->format('z') === 0) { // Yearly
-            $nextYear = (new DateTime('first day of January next year'))->setTime(0, 0, 0);
+            $nextYear = (new \DateTime('first day of January next year'))->setTime(0, 0, 0);
             scheduleIntervalJobs('y');
         }
     }

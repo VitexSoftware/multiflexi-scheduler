@@ -3,7 +3,8 @@
     "description": "Shchedule MultiFlexi jobs",
     "type": "project",
     "require": {
-        "vitexsoftware/multiflexi-core": "dev-main"
+        "vitexsoftware/multiflexi-core": "dev-main",
+        "dragonmantank/cron-expression": "3.x-dev"
     },
     "license": "MIT",
     "autoload": {

@@ -4,8 +4,73 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e842a89e4e350c8c342a658df8ffdedb",
+    "content-hash": "cded79583d30e7f26f789fd7bc69bf96",
     "packages": [
+        {
+            "name": "dragonmantank/cron-expression",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dragonmantank/cron-expression.git",
+                "reference": "f37e405332cd1cca9d287f5044ae2a72c2f53239"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dragonmantank/cron-expression/zipball/f37e405332cd1cca9d287f5044ae2a72c2f53239",
+                "reference": "f37e405332cd1cca9d287f5044ae2a72c2f53239",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2|^8.0"
+            },
+            "replace": {
+                "mtdowling/cron-expression": "^1.0"
+            },
+            "require-dev": {
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^1.0",
+                "phpunit/phpunit": "^7.0|^8.0|^9.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Cron\\": "src/Cron/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Chris Tankersley",
+                    "email": "chris@ctankersley.com",
+                    "homepage": "https://github.com/dragonmantank"
+                }
+            ],
+            "description": "CRON for PHP: Calculate the next or previous run date and determine if a CRON expression is due",
+            "keywords": [
+                "cron",
+                "schedule"
+            ],
+            "support": {
+                "issues": "https://github.com/dragonmantank/cron-expression/issues",
+                "source": "https://github.com/dragonmantank/cron-expression/tree/master"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/dragonmantank",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-10-21T12:57:55+00:00"
+        },
         {
             "name": "fpdo/fluentpdo",
             "version": "dev-master",
@@ -2140,12 +2205,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "d2550915d359df6a7fa0fa89eba4b0b6be4b93f3"
+                "reference": "e6c14f1337735cbc6798dc15e4c7c7a99e5b1ab6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d2550915d359df6a7fa0fa89eba4b0b6be4b93f3",
-                "reference": "d2550915d359df6a7fa0fa89eba4b0b6be4b93f3",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e6c14f1337735cbc6798dc15e4c7c7a99e5b1ab6",
+                "reference": "e6c14f1337735cbc6798dc15e4c7c7a99e5b1ab6",
                 "shasum": ""
             },
             "require": {
@@ -2191,7 +2256,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-07-30T07:14:10+00:00"
+            "time": "2025-07-31T18:09:48+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
@@ -2640,12 +2705,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "0aa3fca5bfd071375a720176ff3890d9d3c2a50f"
+                "reference": "8aca779d6fefd540a365d9c0e76033b57879b608"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/0aa3fca5bfd071375a720176ff3890d9d3c2a50f",
-                "reference": "0aa3fca5bfd071375a720176ff3890d9d3c2a50f",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/8aca779d6fefd540a365d9c0e76033b57879b608",
+                "reference": "8aca779d6fefd540a365d9c0e76033b57879b608",
                 "shasum": ""
             },
             "require": {
@@ -2682,7 +2747,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "12.3-dev"
+                    "dev-main": "12.4-dev"
                 }
             },
             "autoload": {
@@ -2738,7 +2803,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-07-30T07:03:18+00:00"
+            "time": "2025-07-31T12:02:31+00:00"
         },
         {
             "name": "psr/container",
@@ -4528,12 +4593,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "6575e8c431419c1951ba7cf0cfe4f57b2c05cf5b"
+                "reference": "7b3bfe1acdf847b42c1204509246731270634844"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/6575e8c431419c1951ba7cf0cfe4f57b2c05cf5b",
-                "reference": "6575e8c431419c1951ba7cf0cfe4f57b2c05cf5b",
+                "url": "https://api.github.com/repos/symfony/console/zipball/7b3bfe1acdf847b42c1204509246731270634844",
+                "reference": "7b3bfe1acdf847b42c1204509246731270634844",
                 "shasum": ""
             },
             "require": {
@@ -4610,11 +4675,15 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-07-26T13:08:44+00:00"
+            "time": "2025-07-31T06:52:06+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -4977,12 +5046,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/options-resolver.git",
-                "reference": "40e2961bbd81153cf2deb5d3b6958ac34f42996a"
+                "reference": "9a9537a493107f8b7570566f12d8f77547ca5bc2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/options-resolver/zipball/40e2961bbd81153cf2deb5d3b6958ac34f42996a",
-                "reference": "40e2961bbd81153cf2deb5d3b6958ac34f42996a",
+                "url": "https://api.github.com/repos/symfony/options-resolver/zipball/9a9537a493107f8b7570566f12d8f77547ca5bc2",
+                "reference": "9a9537a493107f8b7570566f12d8f77547ca5bc2",
                 "shasum": ""
             },
             "require": {
@@ -5032,11 +5101,15 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-07-29T20:10:18+00:00"
+            "time": "2025-07-31T07:38:42+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -5867,6 +5940,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "dragonmantank/cron-expression": 20,
         "phpstan/phpstan-phpunit": 20,
         "rector/rector": 20,
         "vitexsoftware/multiflexi-core": 20
