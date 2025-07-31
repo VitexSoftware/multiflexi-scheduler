@@ -1,0 +1,2 @@
+debian/tmp/composer.json                usr/lib/multiflexi-scheduler
+src/*.php				usr/lib/multiflexi-scheduler

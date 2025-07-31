@@ -1,0 +1,38 @@
+{
+  "name": "vitexsoftware/multiflexi-scheduler",
+  "description": "Tool used to schedule AbraFlexi Jobs",
+  "type": "project",
+  "require": {
+    "deb/multiflexi-core": "*"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Vítězslav Dvořák",
+      "email": "info@vitexsoftware.cz"
+    }
+  ],
+  "config": {
+    "vendor-dir": "/var/lib/composer/multiflexi-scheduler"
+  },
+  "minimum-stability": "dev",
+  "autoload": {
+    "psr-4": {
+      "MultiFlexi\\": "./",
+    }
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "/usr/share/php/EaseCore/"
+    },
+    {
+      "type": "path",
+      "url": "/usr/share/php/MultiFlexi/"
+    },
+    {
+      "type": "path",
+      "url": "/usr/share/php/EaseFluentPDO/"
+    }
+  ]
+}
