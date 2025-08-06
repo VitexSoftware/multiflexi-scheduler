@@ -1,6 +1,13 @@
-multiflexi-scheduler (0.1.0) UNRELEASED; urgency=low
+multiflexi-scheduler (2.0.0) UNRELEASED; urgency=medium
 
+  * launcher command restore
+
+ -- vitex <info@vitexsoftware.cz>  Wed, 06 Aug 2025 08:08:39 +0200
+
+multiflexi-scheduler (0.1.0) unstable; urgency=low
+
+  [ Vítězslav Dvořák ]
   * Initial release. Closes: #nnnn
     <nnnn is the bug number of your ITP>
 
- -- Vítězslav Dvořák <info@vitexsoftware.cz>  Wed, 30 Jul 2025 09:00:05 +0200
+ -- vitex <info@vitexsoftware.cz>  Wed, 06 Aug 2025 08:08:15 +0200
