@@ -49,7 +49,6 @@ if (\MultiFlexi\Runner::isServiceActive('multiflexi') === false) {
 
 $companer = new Company();
 $companies = $companer->listingQuery();
-$customConfig = new Configuration();
 
 if ($interval) {
     $runtemplate = new \MultiFlexi\RunTemplate();

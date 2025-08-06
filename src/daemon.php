@@ -16,6 +16,8 @@ declare(strict_types=1);
 namespace MultiFlexi;
 
 require_once '../vendor/autoload.php';
+
+\define('APP_NAME', 'MultiFlexi Schedule Daemon');
 \Ease\Shared::init(['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'], '../.env');
 $daemonize = (bool) \Ease\Shared::cfg('MULTIFLEXI_DAEMONIZE', true);
 $loggers = ['syslog', '\MultiFlexi\LogToSQL'];
@@ -75,7 +77,7 @@ function scheduleIntervalJobs(string $interval): void
         if (empty($appsForCompany) && ($interval !== 'i')) {
             $companer->addStatusMessage(sprintf(_('No applications to run for %s in interval %s'), $company['name'], $interval), 'debug');
         } else {
-            if (strtolower(\Ease\Shared::cfg('APP_DEBUG','false')) === 'true') {
+            if (strtolower(\Ease\Shared::cfg('APP_DEBUG', 'false')) === 'true') {
                 $jobber->addStatusMessage(sprintf(_('%s Scheduler interval %s begin'), $company['name'], $interval), 'debug');
             }
 
@@ -92,12 +94,12 @@ function scheduleIntervalJobs(string $interval): void
                     $jobber->addStatusMessage('Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
                 }
 
-                $jobber->prepareJob((int)$runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
+                $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
                 $jobber->scheduleJobRun($startTime);
                 $jobber->addStatusMessage('🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
             }
 
-            if (strtolower(\Ease\Shared::cfg('APP_DEBUG','false')) === 'true') {
+            if (strtolower(\Ease\Shared::cfg('APP_DEBUG', 'false')) === 'true') {
                 $jobber->addStatusMessage(sprintf(_('%s Scheduler interval %s end'), $company['name'], RunTemplate::codeToInterval($interval)), 'debug');
             }
         }
