@@ -1,6 +1,9 @@
 # multiflexi-scheduler
 Shchedule MultiFlexi jobs
 
+![Scheduler Logo](multiflexi-scheduler.svg?raw=true)
+
+
 MultiFlexi
 ----------
 
