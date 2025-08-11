@@ -47,7 +47,7 @@ function waitForDatabase(): void
         } catch (\Throwable $e) {
             if ($try++ < 6) {
                 error_log('Database unavailable: '.$e->getMessage());
-                sleep(10*$try);
+                sleep(10 * $try);
             } else {
                 throw new \RuntimeException('Database unavailable: '.$e->getMessage());
             }
@@ -120,7 +120,6 @@ $nextMonth = (new \DateTime('first day of next month'))->setTime(0, 0, 0);
 $nextYear = (new \DateTime('first day of January next year'))->setTime(0, 0, 0);
 
 do {
-    
     $now = new \DateTime();
 
     if ($now >= $nextMinute) { // Minutely
