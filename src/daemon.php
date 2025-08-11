@@ -45,9 +45,9 @@ function waitForDatabase(): void
 
             break;
         } catch (\Throwable $e) {
-            if ($try++ < 10) {
+            if ($try++ < 6) {
                 error_log('Database unavailable: '.$e->getMessage());
-                sleep(30);
+                sleep(10*$try);
             } else {
                 throw new \RuntimeException('Database unavailable: '.$e->getMessage());
             }
@@ -112,7 +112,7 @@ $nextHour = (new \DateTime())->modify('+1 hour')->setTime((int) date('H') + 1, 0
 $nextDay = (new \DateTime('tomorrow'))->setTime(0, 0, 0);
 $nextWeek = clone $nextDay;
 
-while ((int) $nextWeek->format('w') !== 0) {
+while ((int) $nextWeek->format('N') !== 1) {
     $nextWeek->modify('+1 day');
 }
 
@@ -120,7 +120,7 @@ $nextMonth = (new \DateTime('first day of next month'))->setTime(0, 0, 0);
 $nextYear = (new \DateTime('first day of January next year'))->setTime(0, 0, 0);
 
 do {
-    $intervalOccured = '';
+    
     $now = new \DateTime();
 
     if ($now >= $nextMinute) { // Minutely
