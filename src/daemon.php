@@ -63,6 +63,7 @@ date_default_timezone_set('Europe/Prague');
 
 function scheduleIntervalJobs(string $interval): void
 {
+    $emoji = RunTemplate::getIntervalEmoji($interval);
     $companer = new Company();
     $companies = $companer->listingQuery();
 
@@ -75,10 +76,10 @@ function scheduleIntervalJobs(string $interval): void
         $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'interv', 'delay', 'name', 'executor'], ['company_id' => $company['id'], 'interv' => $interval, 'active' => true]);
 
         if (empty($appsForCompany) && ($interval !== 'i')) {
-            $companer->addStatusMessage(sprintf(_('No applications to run for %s in interval %s'), $company['name'], $interval), 'debug');
+            $companer->addStatusMessage($emoji.' '.sprintf(_('No applications to run for %s in interval %s'), $company['name'], $interval), 'debug');
         } else {
             if (strtolower(\Ease\Shared::cfg('APP_DEBUG', 'false')) === 'true') {
-                $jobber->addStatusMessage(sprintf(_('%s Scheduler interval %s begin'), $company['name'], $interval), 'debug');
+                $jobber->addStatusMessage($emoji.' '.sprintf(_('%s Scheduler interval %s begin'), $company['name'], $interval), 'debug');
             }
 
             foreach ($appsForCompany as $runtemplateData) {
@@ -87,20 +88,19 @@ function scheduleIntervalJobs(string $interval): void
                 }
 
                 $startTime = new \DateTime();
-                $jobber->addStatusMessage('Now Is '.$startTime->format('Y-m-d H:i:s'), 'debug');
 
                 if (empty($runtemplateData['delay']) === false) {
                     $startTime->modify('+'.$runtemplateData['delay'].' seconds');
-                    $jobber->addStatusMessage('Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
+                    $jobber->addStatusMessage($emoji.' '.'Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
                 }
 
                 $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
                 $jobber->scheduleJobRun($startTime);
-                $jobber->addStatusMessage('🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
+                $jobber->addStatusMessage($emoji.' '.'🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
             }
 
             if (strtolower(\Ease\Shared::cfg('APP_DEBUG', 'false')) === 'true') {
-                $jobber->addStatusMessage(sprintf(_('%s Scheduler interval %s end'), $company['name'], RunTemplate::codeToInterval($interval)), 'debug');
+                $jobber->addStatusMessage($emoji.' '.sprintf(_('%s Scheduler interval %s end'), $company['name'], RunTemplate::codeToInterval($interval)), 'debug');
             }
         }
     }
