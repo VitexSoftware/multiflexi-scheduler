@@ -39,7 +39,7 @@ Shared::user(new Anonym());
 
 $jobber = new Job();
 
-if (strtolower(Shared::cfg('APP_DEBUG','false')) == 'true') {
+if (strtolower(Shared::cfg('APP_DEBUG', 'false')) === 'true') {
     $jobber->logBanner();
 }
 
@@ -75,12 +75,12 @@ if ($interval) {
 
                 if (empty($runtemplateData['delay']) === false) {
                     $startTime->modify('+'.$runtemplateData['delay'].' seconds');
-                    $jobber->addStatusMessage($emoji.' '.'Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
+                    $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
                 }
 
                 $jobber->prepareJob($runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
                 $jobber->scheduleJobRun($startTime);
-                $jobber->addStatusMessage($emoji.' '.'🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
+                $jobber->addStatusMessage($emoji.' 🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
             }
 
             if (Shared::cfg('APP_DEBUG') === 'true') {

@@ -35,5 +35,6 @@
       "type": "path",
       "url": "/usr/share/php/EaseFluentPDO/"
     }
-  ]
+  ],
+  "version": "2.1.0"
 }

@@ -9,3 +9,5 @@ debian/files
 /.build/
 /nbproject/
 .env
+/debian/multiflexi-scheduler.debhelper.log
+/debian/multiflexi-scheduler.postrm.debhelper

@@ -1,5 +1,5 @@
 Source: multiflexi-scheduler
-Section: unknown
+Section: admin
 Priority: optional
 Maintainer: Vítězslav Dvořák <info@vitexsoftware.cz>
 Build-Depends:
@@ -18,10 +18,10 @@ Depends:
  ${shlibs:Depends},
  multiflexi-database,
  php-vitexsoftware-multiflexi-core
-Description: Shchedule MultiFlexi jobs
- MultiFlexi Scheduler is a tool designed to automate and manage the scheduling of
- MultiFlexi jobs. It enables users to define, queue, and execute tasks in a flexible
- and efficient manner, supporting integration with various backends and databases.
- The scheduler is suitable for environments where reliable and customizable job execution
- is required, providing logging, error handling, and monitoring capabilities to ensure smooth
- operation of scheduled processes.
+Description: Schedule MultiFlexi jobs
+ MultiFlexi Scheduler automates and manages MultiFlexi job scheduling.
+ It enables users to define, queue, and execute tasks flexibly and efficiently,
+ supporting integration with various backends and databases. The scheduler
+ is suitable for environments where reliable and customizable job execution is
+ required, providing logging, error handling, and monitoring capabilities to
+ ensure smooth operation of scheduled processes.

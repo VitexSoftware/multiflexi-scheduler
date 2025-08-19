@@ -4,12 +4,12 @@
     "type": "project",
     "require": {
         "vitexsoftware/multiflexi-core": "dev-main",
-        "dragonmantank/cron-expression": "3.x-dev"
+        "dragonmantank/cron-expression": "^3.0@dev"
     },
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "MultiFlexi\\Scheduler\\": "src/"
+            "MultiFlexi\\": "src/MultiFlexi/"
         }
     },
     "authors": [
@@ -25,8 +25,7 @@
         "friendsofphp/php-cs-fixer": "^3.75",
         "ergebnis/composer-normalize": "^2.47",
         "ergebnis/php-cs-fixer-config": "^6.46",
-        "phpstan/phpstan-phpunit": "2.0.x-dev",
-        "rector/rector": "dev-main"
+        "phpstan/phpstan-phpunit": "2.0.x-dev"
     },
     "config": {
         "allow-plugins": {

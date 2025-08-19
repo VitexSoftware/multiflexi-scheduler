@@ -1,13 +1,18 @@
-multiflexi-scheduler (2.0.0) UNRELEASED; urgency=medium
+multiflexi-scheduler (2.1.0) UNRELEASED; urgency=medium
+
+  * CronTab support added
+
+ -- vitex <info@vitexsoftware.cz>  Tue, 19 Aug 2025 09:11:28 +0200
+
+multiflexi-scheduler (2.0.0) unstable; urgency=medium
 
   * launcher command restore
 
- -- vitex <info@vitexsoftware.cz>  Wed, 06 Aug 2025 08:08:39 +0200
+ -- vitex <info@vitexsoftware.cz>  Tue, 19 Aug 2025 09:11:07 +0200
 
 multiflexi-scheduler (0.1.0) unstable; urgency=low
 
   [ Vítězslav Dvořák ]
-  * Initial release. Closes: #nnnn
-    <nnnn is the bug number of your ITP>
+  * Initial release.
 
  -- vitex <info@vitexsoftware.cz>  Wed, 06 Aug 2025 08:08:15 +0200
