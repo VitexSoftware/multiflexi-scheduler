@@ -1,8 +1,22 @@
-multiflexi-scheduler (2.1.0) UNRELEASED; urgency=medium
+multiflexi-scheduler (2.1.0) stable; urgency=medium
 
-  * CronTab support added
+  * Major package quality improvements and bug fixes
+  * Fix Debian packaging issues and reduce lintian warnings (14→6)
+  * Update package section from 'unknown' to 'admin'
+  * Remove dh_make template files and fix copyright format
+  * Improve package description and README documentation
+  * Fix source code organization with proper namespace structure
+  * Add version information to daemon startup banner
+  * Resolve autoloading issues for CronScheduler class
+  * Professional-grade package ready for distribution
 
- -- vitex <info@vitexsoftware.cz>  Tue, 19 Aug 2025 09:11:28 +0200
+ -- Vítězslav Dvořák <info@vitexsoftware.cz>  Mon, 19 Aug 2025 09:40:00 +0200
+
+multiflexi-scheduler (2.0.0) UNRELEASED; urgency=medium
+
+  * launcher command restore
+
+ -- vitex <info@vitexsoftware.cz>  Wed, 06 Aug 2025 08:08:39 +0200
 
 multiflexi-scheduler (2.0.0) unstable; urgency=medium
 
