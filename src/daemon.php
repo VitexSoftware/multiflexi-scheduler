@@ -57,7 +57,7 @@ function waitForDatabase(): void
 
 waitForDatabase();
 $scheduler = new CronScheduler();
-$scheduler->logBanner('MultiFlexi Schedule Daemon started');
+$scheduler->logBanner(sprintf('MultiFlexi Schedule Daemon %s started', \Ease\Shared::appVersion()));
 
 date_default_timezone_set('Europe/Prague');
 
