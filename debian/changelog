@@ -1,3 +1,11 @@
+multiflexi-scheduler (2.1.0+nmu1) UNRELEASED; urgency=medium
+
+  * Non-maintainer upload.
+  * Cron scheduling: anchor to window start to avoid per-second
+    duplicates
+
+ -- Vítězslav Dvořák <info@vitexsoftware.cz>  Sun, 24 Aug 2025 20:14:57 +0200
+
 multiflexi-scheduler (2.1.0) stable; urgency=medium
 
   * Major package quality improvements and bug fixes

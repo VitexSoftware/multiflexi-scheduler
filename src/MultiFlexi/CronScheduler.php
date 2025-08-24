@@ -45,7 +45,11 @@ class CronScheduler extends \MultiFlexi\Scheduler
                 $now = new \DateTime();
 
                 if ($cron->isDue($now)) {
-                    $startTime = clone $now;
+                    // Anchor scheduling to the cron window start so we don't re-schedule once per second
+                    // within the same window. Using the next run date from (now - 1 minute) yields a
+                    // stable timestamp for the current due window across the entire minute.
+                    $windowStart = $cron->getNextRunDate((clone $now)->modify('-1 minute'));
+                    $startTime = clone $windowStart;
 
                     if (!empty($runtemplateData['delay'])) {
                         $startTime->modify('+'.$runtemplateData['delay'].' seconds');
