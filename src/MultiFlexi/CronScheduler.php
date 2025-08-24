@@ -33,7 +33,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
-            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor'], ['company_id' => $company['id'], 'active' => true]);
+            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule'], ['company_id' => $company['id'], 'active' => true]);
 
             foreach ($appsForCompany as $runtemplateData) {
                 $runtemplate->setData($runtemplateData);
@@ -55,7 +55,33 @@ class CronScheduler extends \MultiFlexi\Scheduler
                         $startTime->modify('+'.$runtemplateData['delay'].' seconds');
                     }
 
-                    // Check if job already scheduled for this time and runtemplate
+                    // Guard against re-scheduling within the same cron window using DB-backed last_schedule
+                    $lastScheduleRaw = $runtemplateData['last_schedule'] ?? null;
+                    $alreadyScheduledThisWindow = false;
+
+                    if ($lastScheduleRaw) {
+                        try {
+                            $lastSchedule = new \DateTime($lastScheduleRaw);
+                            if ($lastSchedule >= $windowStart) {
+                                $alreadyScheduledThisWindow = true;
+                            }
+                        } catch (\Exception $e) {
+                            // ignore parse issues and proceed to schedule
+                        }
+                    }
+
+                    if ($alreadyScheduledThisWindow) {
+                        continue; // Skip: this cron window was already handled
+                    }
+
+                    // Persist the fact that we're scheduling this window to avoid rapid duplicates
+                    try {
+                        $runtemplate->updateToSQL(['last_schedule' => $windowStart->format('Y-m-d H:i:s')], ['id' => (int) $runtemplateData['id']]);
+                    } catch (\Throwable $t) {
+                        // If we cannot update, fall back to isScheduled guard only
+                    }
+
+                    // Check if job already scheduled for this time and runtemplate (extra guard)
                     if (! $runtemplate->isScheduled($startTime) ) {
                         $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], 'cron');
                         $jobber->scheduleJobRun($startTime);
@@ -78,7 +104,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
 
-            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'interv', 'delay', 'name', 'executor'], ['company_id' => $company['id'], 'interv' => $interval, 'active' => true]);
+            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'interv', 'delay', 'name', 'executor', 'cron'], ['company_id' => $company['id'], 'interv' => $interval, 'active' => true]);
 
             if (empty($appsForCompany) && ($interval !== 'i')) {
                 $companer->addStatusMessage($emoji.' '.sprintf(_('No applications to run for %s in interval %s'), $company['name'], $interval), 'debug');
@@ -89,6 +115,11 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
                 foreach ($appsForCompany as $runtemplateData) {
                     if (null !== $interval && ($interval !== $runtemplateData['interv'])) {
+                        continue;
+                    }
+
+                    // Skip interval scheduling for templates that have explicit cron configured
+                    if (!empty($runtemplateData['cron'])) {
                         continue;
                     }
 
