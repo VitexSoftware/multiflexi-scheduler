@@ -104,7 +104,15 @@ class CronScheduler extends \MultiFlexi\Scheduler
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
 
-            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'interv', 'delay', 'name', 'executor', 'cron'], ['company_id' => $company['id'], 'interv' => $interval, 'active' => true]);
+            // Exclude runtemplates that have explicit cron set to avoid double scheduling
+            $appsForCompany = $runtemplate
+                ->listingQuery()
+                ->select(['id', 'interv', 'delay', 'name', 'executor'])
+                ->where('company_id', $company['id'])
+                ->where('interv', $interval)
+                ->where('active', true)
+                ->where('cron IS NULL OR cron = ?', '')
+                ->fetchAll();
 
             if (empty($appsForCompany) && ($interval !== 'i')) {
                 $companer->addStatusMessage($emoji.' '.sprintf(_('No applications to run for %s in interval %s'), $company['name'], $interval), 'debug');
@@ -118,12 +126,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
                         continue;
                     }
 
-                    // Skip interval scheduling for templates that have explicit cron configured
-                    if (!empty($runtemplateData['cron'])) {
-                        continue;
-                    }
-
-                    $startTime = new \DateTime();
+                    $startTime = new \\DateTime();
 
                     if (empty($runtemplateData['delay']) === false) {
                         $startTime->modify('+'.$runtemplateData['delay'].' seconds');
