@@ -126,7 +126,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
                         continue;
                     }
 
-                    $startTime = new \\DateTime();
+                    $startTime = new \DateTime();
 
                     if (empty($runtemplateData['delay']) === false) {
                         $startTime->modify('+'.$runtemplateData['delay'].' seconds');
