@@ -1,4 +1,4 @@
-multiflexi-scheduler (2.1.0+nmu1) UNRELEASED; urgency=medium
+multiflexi-scheduler (2.1.1) UNRELEASED; urgency=medium
 
   * Non-maintainer upload.
   * Cron scheduling: anchor to window start to avoid per-second
