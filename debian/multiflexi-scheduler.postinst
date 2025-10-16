@@ -4,6 +4,14 @@ set -e
 
 composer-debian multiflexi-scheduler
 
+case "$1" in
+  trigger)
+    if [ "$2" = "restart-multiflexi" ]; then
+      systemctl try-restart multiflexi-scheduler.service || true
+    fi
+    ;;
+esac
+
 #DEBHELPER#
 
 exit 0

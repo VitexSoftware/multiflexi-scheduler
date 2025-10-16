@@ -11,3 +11,4 @@ debian/files
 .env
 /debian/multiflexi-scheduler.debhelper.log
 /debian/multiflexi-scheduler.postrm.debhelper
+/debian/tmp/
