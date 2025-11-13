@@ -109,9 +109,8 @@ do {
         }
     }
 
-    
     $scheduler->scheduleCronJobs();
-    
+
     usleep(100_000); // 0.1 sekundy, šetří CPU
 } while ($daemonize);
 

@@ -30,63 +30,29 @@ class CronScheduler extends \MultiFlexi\Scheduler
         $companies = $companer->listingQuery();
         $jobber = new Job();
         $runtemplate = new \MultiFlexi\RunTemplate();
+        $runtemplate->lastModifiedColumn = null;
 
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
-            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule'], ['company_id' => $company['id'], 'active' => true]);
+            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv' => 'c']);
 
             foreach ($appsForCompany as $runtemplateData) {
-                $runtemplate->setData($runtemplateData);
                 if (empty($runtemplateData['cron'])) {
+                    $runtemplate->updateToSQL(['interv' => 'n'], ['id' => $runtemplateData['id']]);
+                    $runtemplate->addStatusMessage(_('Empty crontab. Disabling interval'), 'warning');
+
                     continue;
                 }
 
+                $runtemplate->setData($runtemplateData);
                 $cron = new CronExpression($runtemplateData['cron']);
-                $now = new \DateTime();
+                $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
 
-                if ($cron->isDue($now)) {
-                    // Anchor scheduling to the cron window start so we don't re-schedule once per second
-                    // within the same window. Using the next run date from (now - 1 minute) yields a
-                    // stable timestamp for the current due window across the entire minute.
-                    $windowStart = $cron->getNextRunDate((clone $now)->modify('-1 minute'));
-                    $startTime = clone $windowStart;
-
-                    if (!empty($runtemplateData['delay'])) {
-                        $startTime->modify('+'.$runtemplateData['delay'].' seconds');
-                    }
-
-                    // Guard against re-scheduling within the same cron window using DB-backed last_schedule
-                    $lastScheduleRaw = $runtemplateData['last_schedule'] ?? null;
-                    $alreadyScheduledThisWindow = false;
-
-                    if ($lastScheduleRaw) {
-                        try {
-                            $lastSchedule = new \DateTime($lastScheduleRaw);
-                            if ($lastSchedule >= $windowStart) {
-                                $alreadyScheduledThisWindow = true;
-                            }
-                        } catch (\Exception $e) {
-                            // ignore parse issues and proceed to schedule
-                        }
-                    }
-
-                    if ($alreadyScheduledThisWindow) {
-                        continue; // Skip: this cron window was already handled
-                    }
-
-                    // Persist the fact that we're scheduling this window to avoid rapid duplicates
-                    try {
-                        $runtemplate->updateToSQL(['last_schedule' => $windowStart->format('Y-m-d H:i:s')], ['id' => (int) $runtemplateData['id']]);
-                    } catch (\Throwable $t) {
-                        // If we cannot update, fall back to isScheduled guard only
-                    }
-
-                    // Check if job already scheduled for this time and runtemplate (extra guard)
-                    if (! $runtemplate->isScheduled($startTime) ) {
-                        $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], 'cron');
-                        $jobber->scheduleJobRun($startTime);
-                        $jobber->addStatusMessage('🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
-                    }
+                try {
+                    $runtemplate->updateToSQL(['next_schedule' => $startTime->format('Y-m-d H:i:s')], ['id' => $runtemplateData['id']]);
+                    $jobber->addStatusMessage('🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
+                } catch (\Throwable $t) {
+                    // If we cannot update, fall back to isScheduled guard only
                 }
             }
         }
