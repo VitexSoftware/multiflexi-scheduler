@@ -74,14 +74,12 @@ class CronScheduler extends \MultiFlexi\Scheduler
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
 
-            // Exclude runtemplates that have explicit cron set to avoid double scheduling
             $appsForCompany = $runtemplate
                 ->listingQuery()
                 ->select(['id', 'interv', 'delay', 'name', 'executor'])
                 ->where('company_id', $company['id'])
                 ->where('interv', $interval)
                 ->where('active', true)
-                ->where('cron IS NULL OR cron = ?', '')
                 ->fetchAll();
 
             if (empty($appsForCompany) && ($interval !== 'i')) {
