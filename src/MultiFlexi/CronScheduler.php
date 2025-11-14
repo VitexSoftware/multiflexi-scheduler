@@ -39,7 +39,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
             foreach ($appsForCompany as $runtemplateData) {
                 if (empty($runtemplateData['cron'])) {
                     $runtemplate->updateToSQL(['interv' => 'n'], ['id' => $runtemplateData['id']]);
-                    $runtemplate->addStatusMessage(_('Empty crontab. Disabling interval'), 'warning');
+                    $runtemplate->addStatusMessage(_('Empty crontab. Disabling interval').' #'.$runtemplateData['id'], 'warning');
 
                     continue;
                 }
@@ -50,6 +50,10 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
                 try {
                     $runtemplate->updateToSQL(['next_schedule' => $startTime->format('Y-m-d H:i:s')], ['id' => $runtemplateData['id']]);
+
+                    $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
+                    $jobber->scheduleJobRun($startTime);
+
                     $jobber->addStatusMessage('🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
                 } catch (\Throwable $t) {
                     // If we cannot update, fall back to isScheduled guard only
@@ -99,7 +103,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
                         $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
                     }
 
-                    $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
+                    $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
                     $jobber->scheduleJobRun($startTime);
                     $jobber->addStatusMessage($emoji.' 🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
                 }
