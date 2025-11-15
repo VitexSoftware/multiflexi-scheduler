@@ -38,12 +38,12 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
             foreach ($appsForCompany as $runtemplateData) {
                 if ($runtemplateData['interv'] !== 'n') {
-                    
+
                     $emoji = RunTemplate::getIntervalEmoji($runtemplateData['interv']);
-                    
+
                     if ($runtemplateData['interv'] === 'c' && empty($runtemplateData['cron'])) {
                         $runtemplate->updateToSQL(['interv' => 'n'], ['id' => $runtemplateData['id']]);
-                        $runtemplate->addStatusMessage(_('Empty crontab. Disabling interval').' #'.$runtemplateData['id'], 'warning');
+                        $runtemplate->addStatusMessage($emoji.' '._('Empty crontab. Disabling interval').' #'.$runtemplateData['id'], 'warning');
 
                         continue;
                     }
@@ -66,8 +66,6 @@ class CronScheduler extends \MultiFlexi\Scheduler
                     $scheduleAt = $startTime->format('Y-m-d H:i:s');
 
                     if ($scheduleAt !== $runtemplateData['last_schedule']) {
-                        $runtemplate->updateToSQL(['next_schedule' => $scheduleAt], ['id' => $runtemplateData['id']]);
-
                         try {
                             $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
                             $jobber->scheduleJobRun($startTime);
