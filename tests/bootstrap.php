@@ -28,5 +28,10 @@ foreach ($autoloadPaths as $autoloadPath) {
     }
 }
 
+if (!class_exists('Composer\Autoload\ClassLoader')) {
+    fwrite(STDERR, "Error: Composer autoloader not found. Run 'composer install'.\n");
+    exit(1);
+}
+
 // Set timezone for tests
 date_default_timezone_set('UTC');
