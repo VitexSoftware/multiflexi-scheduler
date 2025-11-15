@@ -15,12 +15,12 @@ declare(strict_types=1);
 
 namespace MultiFlexi\Test;
 
+use Cron\CronExpression;
 use MultiFlexi\CronScheduler;
 use PHPUnit\Framework\TestCase;
-use Cron\CronExpression;
 
 /**
- * Integration test suite for CronScheduler
+ * Integration test suite for CronScheduler.
  *
  * These tests validate the integration behavior and workflow
  * of the CronScheduler class, testing more complex scenarios
@@ -29,7 +29,7 @@ use Cron\CronExpression;
 class CronSchedulerIntegrationTest extends TestCase
 {
     /**
-     * Test complete workflow of cron scheduling with multiple intervals
+     * Test complete workflow of cron scheduling with multiple intervals.
      */
     public function testMultipleIntervalSchedulingWorkflow(): void
     {
@@ -50,19 +50,19 @@ class CronSchedulerIntegrationTest extends TestCase
             $this->assertInstanceOf(
                 \DateTime::class,
                 $nextRun,
-                "Interval '{$code}' should produce valid next run date"
+                "Interval '{$code}' should produce valid next run date",
             );
 
             $this->assertGreaterThanOrEqual(
                 $baseTime->getTimestamp(),
                 $nextRun->getTimestamp(),
-                "Next run should be at or after current time"
+                'Next run should be at or after current time',
             );
         }
     }
 
     /**
-     * Test scheduling across month boundaries
+     * Test scheduling across month boundaries.
      */
     public function testSchedulingAcrossMonthBoundaries(): void
     {
@@ -71,26 +71,26 @@ class CronSchedulerIntegrationTest extends TestCase
         // Test end of January (30 days)
         $endOfJan = new \DateTime('2024-01-31 23:00:00');
         $nextRun = $cron->getNextRunDate($endOfJan, 0, false);
-        
+
         $this->assertEquals(
             '2024-02-01',
             $nextRun->format('Y-m-d'),
-            'Should correctly schedule across month boundary'
+            'Should correctly schedule across month boundary',
         );
 
         // Test end of February (leap year)
         $endOfFeb = new \DateTime('2024-02-29 23:00:00');
         $nextRunFromFeb = $cron->getNextRunDate($endOfFeb, 0, false);
-        
+
         $this->assertEquals(
             '2024-03-01',
             $nextRunFromFeb->format('Y-m-d'),
-            'Should correctly handle leap year boundary'
+            'Should correctly handle leap year boundary',
         );
     }
 
     /**
-     * Test scheduling across year boundaries
+     * Test scheduling across year boundaries.
      */
     public function testSchedulingAcrossYearBoundaries(): void
     {
@@ -102,12 +102,12 @@ class CronSchedulerIntegrationTest extends TestCase
         $this->assertEquals(
             '2025-01-01',
             $nextRun->format('Y-m-d'),
-            'Should correctly schedule across year boundary'
+            'Should correctly schedule across year boundary',
         );
     }
 
     /**
-     * Test delay accumulation with multiple sequential schedules
+     * Test delay accumulation with multiple sequential schedules.
      */
     public function testDelayAccumulationScenario(): void
     {
@@ -124,13 +124,13 @@ class CronSchedulerIntegrationTest extends TestCase
             $this->assertEquals(
                 $expectedDiff,
                 $actualDiff,
-                "Delay of {$delay} seconds should be applied correctly"
+                "Delay of {$delay} seconds should be applied correctly",
             );
         }
     }
 
     /**
-     * Test cron expression edge cases with specific dates
+     * Test cron expression edge cases with specific dates.
      */
     public function testCronExpressionEdgeCases(): void
     {
@@ -146,12 +146,12 @@ class CronSchedulerIntegrationTest extends TestCase
         $this->assertContains(
             $nextRun->format('m'),
             ['01', '03', '05', '07', '08', '10', '12'],
-            'Day 31 should only occur in months with 31 days'
+            'Day 31 should only occur in months with 31 days',
         );
     }
 
     /**
-     * Test weekly scheduling on different days
+     * Test weekly scheduling on different days.
      */
     public function testWeeklySchedulingOnDifferentDays(): void
     {
@@ -170,18 +170,18 @@ class CronSchedulerIntegrationTest extends TestCase
             $startDate = new \DateTime('2024-01-01'); // Monday
 
             $nextRun = $cron->getNextRunDate($startDate, 0, true);
-            $actualDay = (int)$nextRun->format('w');
+            $actualDay = (int) $nextRun->format('w');
 
             $this->assertEquals(
                 $dayNum,
                 $actualDay,
-                "Cron should schedule on {$dayName} (day {$dayNum})"
+                "Cron should schedule on {$dayName} (day {$dayNum})",
             );
         }
     }
 
     /**
-     * Test scheduling with very frequent intervals
+     * Test scheduling with very frequent intervals.
      */
     public function testHighFrequencyScheduling(): void
     {
@@ -193,25 +193,25 @@ class CronSchedulerIntegrationTest extends TestCase
         $currentTime = clone $startTime;
 
         // Get next 5 runs
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 5; ++$i) {
             $nextRun = $cron->getNextRunDate($currentTime, 0, false);
             $runs[] = $nextRun;
             $currentTime = $nextRun;
         }
 
         // Verify each run is 1 minute apart
-        for ($i = 1; $i < count($runs); $i++) {
+        for ($i = 1; $i < \count($runs); ++$i) {
             $diff = $runs[$i]->getTimestamp() - $runs[$i - 1]->getTimestamp();
             $this->assertEquals(
                 60,
                 $diff,
-                "High-frequency runs should be exactly 60 seconds apart"
+                'High-frequency runs should be exactly 60 seconds apart',
             );
         }
     }
 
     /**
-     * Test error recovery scenarios
+     * Test error recovery scenarios.
      */
     public function testErrorRecoveryScenarios(): void
     {
@@ -227,20 +227,20 @@ class CronSchedulerIntegrationTest extends TestCase
 
         $this->assertNotEmpty(
             $exceptions,
-            'Invalid cron expressions should throw exceptions'
+            'Invalid cron expressions should throw exceptions',
         );
 
         // Verify error messages are meaningful
         foreach ($exceptions as $exception) {
             $this->assertNotEmpty(
                 $exception->getMessage(),
-                'Exception should have meaningful error message'
+                'Exception should have meaningful error message',
             );
         }
     }
 
     /**
-     * Test concurrent scheduling scenarios
+     * Test concurrent scheduling scenarios.
      */
     public function testConcurrentSchedulingScenarios(): void
     {
@@ -249,23 +249,25 @@ class CronSchedulerIntegrationTest extends TestCase
 
         // Simulate multiple parallel schedule calculations
         $schedules = [];
-        for ($i = 0; $i < 10; $i++) {
+
+        for ($i = 0; $i < 10; ++$i) {
             $schedules[] = $cron->getNextRunDate(clone $baseTime, 0, true);
         }
 
         // All should produce the same result
         $firstSchedule = $schedules[0]->format('Y-m-d H:i:s');
+
         foreach ($schedules as $schedule) {
             $this->assertEquals(
                 $firstSchedule,
                 $schedule->format('Y-m-d H:i:s'),
-                'Concurrent calculations should produce identical results'
+                'Concurrent calculations should produce identical results',
             );
         }
     }
 
     /**
-     * Test schedule persistence and recovery
+     * Test schedule persistence and recovery.
      */
     public function testSchedulePersistenceFormat(): void
     {
@@ -276,26 +278,26 @@ class CronSchedulerIntegrationTest extends TestCase
         $this->assertMatchesRegularExpression(
             '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/',
             $sqlFormat,
-            'Schedule format should be SQL-compatible'
+            'Schedule format should be SQL-compatible',
         );
 
         // Verify we can reconstruct the DateTime from SQL format
-        $reconstructed = \DateTime::createFromFormat('Y-m-d H:i:s', $sqlFormat);
+        $reconstructed = \DateTime::createFromFormat('!Y-m-d H:i:s', $sqlFormat);
         $this->assertInstanceOf(
             \DateTime::class,
             $reconstructed,
-            'Should be able to reconstruct DateTime from SQL format'
+            'Should be able to reconstruct DateTime from SQL format',
         );
 
         $this->assertEquals(
             $sqlFormat,
             $reconstructed->format('Y-m-d H:i:s'),
-            'Reconstructed time should match original'
+            'Reconstructed time should match original',
         );
     }
 
     /**
-     * Test scheduling with DST transitions
+     * Test scheduling with DST transitions.
      */
     public function testDaylightSavingTimeTransitions(): void
     {
@@ -310,7 +312,7 @@ class CronSchedulerIntegrationTest extends TestCase
         $this->assertInstanceOf(
             \DateTime::class,
             $nextRun,
-            'Should handle DST spring forward'
+            'Should handle DST spring forward',
         );
 
         // Fall back date (DST ends - hour repeated)
@@ -320,12 +322,12 @@ class CronSchedulerIntegrationTest extends TestCase
         $this->assertInstanceOf(
             \DateTime::class,
             $nextRunDstEnd,
-            'Should handle DST fall back'
+            'Should handle DST fall back',
         );
     }
 
     /**
-     * Test status message formatting consistency
+     * Test status message formatting consistency.
      */
     public function testStatusMessageFormattingConsistency(): void
     {
@@ -357,13 +359,13 @@ class CronSchedulerIntegrationTest extends TestCase
                 $testCase['templateName'],
                 $testCase['templateId'],
                 (new \DateTime())->format(\DATE_RSS),
-                $testCase['company']
+                $testCase['company'],
             );
 
             // Verify message contains all required components
             $this->assertStringContainsString($testCase['emoji'], $message);
             $this->assertStringContainsString('🧩', $message);
-            $this->assertStringContainsString((string)$testCase['appKey'], $message);
+            $this->assertStringContainsString((string) $testCase['appKey'], $message);
             $this->assertStringContainsString($testCase['appName'], $message);
             $this->assertStringContainsString($testCase['templateName'], $message);
             $this->assertStringContainsString('🏣', $message);
@@ -372,7 +374,7 @@ class CronSchedulerIntegrationTest extends TestCase
     }
 
     /**
-     * Test interval code validation
+     * Test interval code validation.
      */
     public function testIntervalCodeValidation(): void
     {
@@ -381,20 +383,20 @@ class CronSchedulerIntegrationTest extends TestCase
 
         foreach ($validCodes as $code) {
             $this->assertIsString($code, "Interval code '{$code}' should be a string");
-            $this->assertEquals(1, strlen($code), "Valid interval codes should be single characters");
+            $this->assertEquals(1, \strlen($code), 'Valid interval codes should be single characters');
         }
 
         foreach ($invalidCodes as $code) {
             $this->assertNotContains(
                 $code,
                 $validCodes,
-                "Code '{$code}' should not be in valid codes"
+                "Code '{$code}' should not be in valid codes",
             );
         }
     }
 
     /**
-     * Test that scheduling respects schedule history
+     * Test that scheduling respects schedule history.
      */
     public function testScheduleHistoryRespected(): void
     {
@@ -405,7 +407,7 @@ class CronSchedulerIntegrationTest extends TestCase
         $shouldSchedule = ($currentSchedule !== $lastSchedule);
         $this->assertFalse(
             $shouldSchedule,
-            'Should not schedule when current matches last schedule'
+            'Should not schedule when current matches last schedule',
         );
 
         // Different schedule should trigger
@@ -413,7 +415,7 @@ class CronSchedulerIntegrationTest extends TestCase
         $shouldScheduleNew = ($newSchedule !== $lastSchedule);
         $this->assertTrue(
             $shouldScheduleNew,
-            'Should schedule when current differs from last schedule'
+            'Should schedule when current differs from last schedule',
         );
     }
 }

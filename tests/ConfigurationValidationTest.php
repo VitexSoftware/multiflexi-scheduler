@@ -18,7 +18,7 @@ namespace MultiFlexi\Test;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test suite for configuration file validation
+ * Test suite for configuration file validation.
  *
  * This test suite validates various configuration files in the project:
  * - .vscode/settings.json - VSCode workspace settings
@@ -33,57 +33,57 @@ class ConfigurationValidationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->projectRoot = dirname(__DIR__);
+        $this->projectRoot = \dirname(__DIR__);
     }
 
     /**
-     * Test that .vscode/settings.json exists
+     * Test that .vscode/settings.json exists.
      */
     public function testVSCodeSettingsFileExists(): void
     {
-        $settingsPath = $this->projectRoot . '/.vscode/settings.json';
-        
+        $settingsPath = $this->projectRoot.'/.vscode/settings.json';
+
         $this->assertFileExists(
             $settingsPath,
-            '.vscode/settings.json should exist'
+            '.vscode/settings.json should exist',
         );
 
         $this->assertFileIsReadable(
             $settingsPath,
-            '.vscode/settings.json should be readable'
+            '.vscode/settings.json should be readable',
         );
     }
 
     /**
-     * Test that .vscode/settings.json contains valid JSON
+     * Test that .vscode/settings.json contains valid JSON.
      */
     public function testVSCodeSettingsIsValidJSON(): void
     {
-        $settingsPath = $this->projectRoot . '/.vscode/settings.json';
+        $settingsPath = $this->projectRoot.'/.vscode/settings.json';
         $content = file_get_contents($settingsPath);
 
         $this->assertNotFalse(
             $content,
-            'Should be able to read .vscode/settings.json'
+            'Should be able to read .vscode/settings.json',
         );
 
         $decoded = json_decode($content, true);
         $jsonError = json_last_error();
 
         $this->assertEquals(
-            JSON_ERROR_NONE,
+            \JSON_ERROR_NONE,
             $jsonError,
-            'JSON should be valid. Error: ' . json_last_error_msg()
+            'JSON should be valid. Error: '.json_last_error_msg(),
         );
 
         $this->assertIsArray(
             $decoded,
-            'Decoded JSON should be an array/object'
+            'Decoded JSON should be an array/object',
         );
     }
 
     /**
-     * Test that workbench.colorCustomizations key exists
+     * Test that workbench.colorCustomizations key exists.
      */
     public function testWorkbenchColorCustomizationsExists(): void
     {
@@ -92,17 +92,17 @@ class ConfigurationValidationTest extends TestCase
         $this->assertArrayHasKey(
             'workbench.colorCustomizations',
             $settings,
-            'Settings should contain workbench.colorCustomizations'
+            'Settings should contain workbench.colorCustomizations',
         );
 
         $this->assertIsArray(
             $settings['workbench.colorCustomizations'],
-            'workbench.colorCustomizations should be an object/array'
+            'workbench.colorCustomizations should be an object/array',
         );
     }
 
     /**
-     * Test that peacock.color key exists
+     * Test that peacock.color key exists.
      */
     public function testPeacockColorExists(): void
     {
@@ -111,17 +111,17 @@ class ConfigurationValidationTest extends TestCase
         $this->assertArrayHasKey(
             'peacock.color',
             $settings,
-            'Settings should contain peacock.color'
+            'Settings should contain peacock.color',
         );
 
         $this->assertIsString(
             $settings['peacock.color'],
-            'peacock.color should be a string'
+            'peacock.color should be a string',
         );
     }
 
     /**
-     * Test that all color values are valid hex colors
+     * Test that all color values are valid hex colors.
      */
     public function testColorValuesAreValidHexColors(): void
     {
@@ -129,18 +129,18 @@ class ConfigurationValidationTest extends TestCase
         $colorCustomizations = $settings['workbench.colorCustomizations'];
 
         foreach ($colorCustomizations as $key => $value) {
-            if (is_string($value)) {
+            if (\is_string($value)) {
                 $this->assertMatchesRegularExpression(
                     '/^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$/',
                     $value,
-                    "Color value for '{$key}' should be a valid hex color (with optional alpha)"
+                    "Color value for '{$key}' should be a valid hex color (with optional alpha)",
                 );
             }
         }
     }
 
     /**
-     * Test that peacock.color is a valid hex color
+     * Test that peacock.color is a valid hex color.
      */
     public function testPeacockColorIsValidHexColor(): void
     {
@@ -150,12 +150,12 @@ class ConfigurationValidationTest extends TestCase
         $this->assertMatchesRegularExpression(
             '/^#[0-9a-fA-F]{6}$/',
             $peacockColor,
-            'peacock.color should be a valid 6-digit hex color'
+            'peacock.color should be a valid 6-digit hex color',
         );
     }
 
     /**
-     * Test that specific required color customization keys exist
+     * Test that specific required color customization keys exist.
      */
     public function testRequiredColorCustomizationKeysExist(): void
     {
@@ -176,13 +176,13 @@ class ConfigurationValidationTest extends TestCase
             $this->assertArrayHasKey(
                 $key,
                 $colorCustomizations,
-                "Color customizations should contain '{$key}'"
+                "Color customizations should contain '{$key}'",
             );
         }
     }
 
     /**
-     * Test that color values use consistent green theme
+     * Test that color values use consistent green theme.
      */
     public function testColorThemeConsistency(): void
     {
@@ -193,27 +193,27 @@ class ConfigurationValidationTest extends TestCase
         $this->assertEquals(
             '#076f21',
             $peacockColor,
-            'Peacock color should be the expected green theme color'
+            'Peacock color should be the expected green theme color',
         );
 
         // Verify key colors match the green theme
         $colorCustomizations = $settings['workbench.colorCustomizations'];
-        
+
         $this->assertEquals(
             '#076f21',
             $colorCustomizations['statusBar.background'],
-            'Status bar should use peacock color'
+            'Status bar should use peacock color',
         );
 
         $this->assertEquals(
             '#076f21',
             $colorCustomizations['titleBar.activeBackground'],
-            'Title bar should use peacock color'
+            'Title bar should use peacock color',
         );
     }
 
     /**
-     * Test that foreground colors are light on dark backgrounds
+     * Test that foreground colors are light on dark backgrounds.
      */
     public function testForegroundColorContrast(): void
     {
@@ -232,14 +232,14 @@ class ConfigurationValidationTest extends TestCase
                 $this->assertMatchesRegularExpression(
                     '/^#[e-f][0-9a-f]{5}$/i',
                     $colorCustomizations[$key],
-                    "Foreground color '{$key}' should be light for contrast"
+                    "Foreground color '{$key}' should be light for contrast",
                 );
             }
         }
     }
 
     /**
-     * Test that alpha channel colors have correct format
+     * Test that alpha channel colors have correct format.
      */
     public function testAlphaChannelColorFormat(): void
     {
@@ -255,13 +255,13 @@ class ConfigurationValidationTest extends TestCase
         foreach ($alphaColorKeys as $key) {
             if (isset($colorCustomizations[$key])) {
                 $color = $colorCustomizations[$key];
-                
+
                 // Should be 8 characters (6 for color + 2 for alpha)
-                if (strlen($color) === 9) { // Including #
+                if (\strlen($color) === 9) { // Including #
                     $this->assertMatchesRegularExpression(
                         '/^#[0-9a-fA-F]{6}[0-9a-fA-F]{2}$/',
                         $color,
-                        "Color '{$key}' with alpha channel should have correct format"
+                        "Color '{$key}' with alpha channel should have correct format",
                     );
                 }
             }
@@ -269,58 +269,58 @@ class ConfigurationValidationTest extends TestCase
     }
 
     /**
-     * Test JSON file size is reasonable
+     * Test JSON file size is reasonable.
      */
     public function testJSONFileSizeIsReasonable(): void
     {
-        $settingsPath = $this->projectRoot . '/.vscode/settings.json';
+        $settingsPath = $this->projectRoot.'/.vscode/settings.json';
         $fileSize = filesize($settingsPath);
 
         $this->assertGreaterThan(
             0,
             $fileSize,
-            'Settings file should not be empty'
+            'Settings file should not be empty',
         );
 
         $this->assertLessThan(
             10240, // 10KB
             $fileSize,
-            'Settings file should not be unreasonably large'
+            'Settings file should not be unreasonably large',
         );
     }
 
     /**
-     * Test JSON formatting and structure
+     * Test JSON formatting and structure.
      */
     public function testJSONFormattingStructure(): void
     {
-        $settingsPath = $this->projectRoot . '/.vscode/settings.json';
+        $settingsPath = $this->projectRoot.'/.vscode/settings.json';
         $content = file_get_contents($settingsPath);
 
         // Should start with {
         $this->assertStringStartsWith(
             '{',
             trim($content),
-            'JSON should start with opening brace'
+            'JSON should start with opening brace',
         );
 
         // Should end with }
         $this->assertStringEndsWith(
             '}',
             trim($content),
-            'JSON should end with closing brace'
+            'JSON should end with closing brace',
         );
 
         // Should contain proper indentation (4 spaces based on the file)
         $this->assertStringContainsString(
             '    "workbench.colorCustomizations"',
             $content,
-            'JSON should be properly indented'
+            'JSON should be properly indented',
         );
     }
 
     /**
-     * Test that all required VSCode color customization properties are strings
+     * Test that all required VSCode color customization properties are strings.
      */
     public function testColorCustomizationValuesAreStrings(): void
     {
@@ -330,22 +330,22 @@ class ConfigurationValidationTest extends TestCase
         foreach ($colorCustomizations as $key => $value) {
             $this->assertIsString(
                 $value,
-                "Value for '{$key}' should be a string"
+                "Value for '{$key}' should be a string",
             );
 
             $this->assertNotEmpty(
                 $value,
-                "Value for '{$key}' should not be empty"
+                "Value for '{$key}' should not be empty",
             );
         }
     }
 
     /**
-     * Test that no duplicate keys exist in JSON
+     * Test that no duplicate keys exist in JSON.
      */
     public function testNoDuplicateJSONKeys(): void
     {
-        $settingsPath = $this->projectRoot . '/.vscode/settings.json';
+        $settingsPath = $this->projectRoot.'/.vscode/settings.json';
         $content = file_get_contents($settingsPath);
 
         // Parse to count keys
@@ -354,9 +354,9 @@ class ConfigurationValidationTest extends TestCase
         $uniqueKeys = array_unique($topLevelKeys);
 
         $this->assertCount(
-            count($topLevelKeys),
+            \count($topLevelKeys),
             $uniqueKeys,
-            'JSON should not contain duplicate top-level keys'
+            'JSON should not contain duplicate top-level keys',
         );
 
         // Check nested workbench.colorCustomizations
@@ -365,15 +365,15 @@ class ConfigurationValidationTest extends TestCase
             $uniqueColorKeys = array_unique($colorKeys);
 
             $this->assertCount(
-                count($colorKeys),
+                \count($colorKeys),
                 $uniqueColorKeys,
-                'Color customizations should not contain duplicate keys'
+                'Color customizations should not contain duplicate keys',
             );
         }
     }
 
     /**
-     * Test that activity bar badge colors exist
+     * Test that activity bar badge colors exist.
      */
     public function testActivityBarBadgeColorsExist(): void
     {
@@ -383,18 +383,18 @@ class ConfigurationValidationTest extends TestCase
         $this->assertArrayHasKey(
             'activityBarBadge.background',
             $colorCustomizations,
-            'Should have activityBarBadge.background'
+            'Should have activityBarBadge.background',
         );
 
         $this->assertArrayHasKey(
             'activityBarBadge.foreground',
             $colorCustomizations,
-            'Should have activityBarBadge.foreground'
+            'Should have activityBarBadge.foreground',
         );
     }
 
     /**
-     * Test that hover and remote colors are consistent
+     * Test that hover and remote colors are consistent.
      */
     public function testHoverAndRemoteColorConsistency(): void
     {
@@ -406,7 +406,7 @@ class ConfigurationValidationTest extends TestCase
             $this->assertMatchesRegularExpression(
                 '/^#[0-9a-fA-F]{6}$/',
                 $colorCustomizations['sash.hoverBorder'],
-                'Hover border color should be valid'
+                'Hover border color should be valid',
             );
         }
 
@@ -415,13 +415,13 @@ class ConfigurationValidationTest extends TestCase
             $this->assertEquals(
                 $colorCustomizations['statusBar.background'],
                 $colorCustomizations['statusBarItem.remoteBackground'],
-                'Remote status bar item should match status bar background'
+                'Remote status bar item should match status bar background',
             );
         }
     }
 
     /**
-     * Test command center border exists
+     * Test command center border exists.
      */
     public function testCommandCenterBorderExists(): void
     {
@@ -431,26 +431,12 @@ class ConfigurationValidationTest extends TestCase
         $this->assertArrayHasKey(
             'commandCenter.border',
             $colorCustomizations,
-            'Should have commandCenter.border'
+            'Should have commandCenter.border',
         );
     }
 
     /**
-     * Helper method to load VSCode settings
-     */
-    private function loadVSCodeSettings(): array
-    {
-        $settingsPath = $this->projectRoot . '/.vscode/settings.json';
-        $content = file_get_contents($settingsPath);
-        $settings = json_decode($content, true);
-
-        $this->assertIsArray($settings, 'Settings should be a valid array');
-
-        return $settings;
-    }
-
-    /**
-     * Test that the settings file follows VSCode schema conventions
+     * Test that the settings file follows VSCode schema conventions.
      */
     public function testVSCodeSchemaConventions(): void
     {
@@ -461,13 +447,13 @@ class ConfigurationValidationTest extends TestCase
             $this->assertMatchesRegularExpression(
                 '/^[a-z][a-zA-Z0-9]*(\.[a-zA-Z0-9]+)*$/',
                 $key,
-                "Key '{$key}' should follow VSCode setting name convention"
+                "Key '{$key}' should follow VSCode setting name convention",
             );
         }
     }
 
     /**
-     * Test that color values don't use shorthand hex notation
+     * Test that color values don't use shorthand hex notation.
      */
     public function testNoShorthandHexColors(): void
     {
@@ -475,21 +461,21 @@ class ConfigurationValidationTest extends TestCase
         $colorCustomizations = $settings['workbench.colorCustomizations'];
 
         foreach ($colorCustomizations as $key => $value) {
-            if (is_string($value) && preg_match('/^#[0-9a-fA-F]+$/', $value)) {
+            if (\is_string($value) && preg_match('/^#[0-9a-fA-F]+$/', $value)) {
                 // Should be either 6 or 8 characters (not 3 or 4)
-                $hexLength = strlen($value) - 1; // Subtract the #
-                
+                $hexLength = \strlen($value) - 1; // Subtract the #
+
                 $this->assertContains(
                     $hexLength,
                     [6, 8],
-                    "Color '{$key}' should use full hex notation (6 or 8 chars), not shorthand"
+                    "Color '{$key}' should use full hex notation (6 or 8 chars), not shorthand",
                 );
             }
         }
     }
 
     /**
-     * Test inactive foreground has proper alpha transparency
+     * Test inactive foreground has proper alpha transparency.
      */
     public function testInactiveForegroundTransparency(): void
     {
@@ -497,15 +483,15 @@ class ConfigurationValidationTest extends TestCase
         $colorCustomizations = $settings['workbench.colorCustomizations'];
 
         $inactiveKey = 'activityBar.inactiveForeground';
-        
+
         if (isset($colorCustomizations[$inactiveKey])) {
             $color = $colorCustomizations[$inactiveKey];
-            
+
             // Should have alpha channel for transparency
             $this->assertEquals(
                 9,
-                strlen($color),
-                "Inactive foreground should include alpha channel"
+                \strlen($color),
+                'Inactive foreground should include alpha channel',
             );
 
             // Extract alpha value (last 2 chars)
@@ -516,8 +502,22 @@ class ConfigurationValidationTest extends TestCase
             $this->assertLessThan(
                 255,
                 $alphaValue,
-                "Inactive foreground should have some transparency"
+                'Inactive foreground should have some transparency',
             );
         }
+    }
+
+    /**
+     * Helper method to load VSCode settings.
+     */
+    private function loadVSCodeSettings(): array
+    {
+        $settingsPath = $this->projectRoot.'/.vscode/settings.json';
+        $content = file_get_contents($settingsPath);
+        $settings = json_decode($content, true);
+
+        $this->assertIsArray($settings, 'Settings should be a valid array');
+
+        return $settings;
     }
 }

@@ -15,17 +15,17 @@ declare(strict_types=1);
 
 namespace MultiFlexi\Test;
 
-use MultiFlexi\CronScheduler;
-use MultiFlexi\Company;
-use MultiFlexi\Job;
-use MultiFlexi\RunTemplate;
-use MultiFlexi\ConfigFields;
-use MultiFlexi\LogToSQL;
-use PHPUnit\Framework\TestCase;
 use Cron\CronExpression;
+use MultiFlexi\Company;
+use MultiFlexi\ConfigFields;
+use MultiFlexi\CronScheduler;
+use MultiFlexi\Job;
+use MultiFlexi\LogToSQL;
+use MultiFlexi\RunTemplate;
+use PHPUnit\Framework\TestCase;
 
 /**
- * Test suite for CronScheduler class
+ * Test suite for CronScheduler class.
  *
  * Tests the scheduling of cron jobs with various scenarios including:
  * - Standard cron expression scheduling
@@ -46,13 +46,13 @@ class CronSchedulerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create mock objects for dependencies
         $this->mockCompany = $this->createMock(Company::class);
         $this->mockJob = $this->createMock(Job::class);
         $this->mockRunTemplate = $this->createMock(RunTemplate::class);
         $this->mockLogToSQL = $this->createMock(LogToSQL::class);
-        
+
         // Create the scheduler instance
         $this->scheduler = $this->getMockBuilder(CronScheduler::class)
             ->onlyMethods([])
@@ -62,76 +62,76 @@ class CronSchedulerTest extends TestCase
     protected function tearDown(): void
     {
         parent::tearDown();
-        unset($this->scheduler);
+        $this->scheduler = null;
     }
 
     /**
-     * Test that scheduleCronJobs method exists and is public
+     * Test that scheduleCronJobs method exists and is public.
      */
     public function testScheduleCronJobsMethodExists(): void
     {
         $this->assertTrue(
             method_exists(CronScheduler::class, 'scheduleCronJobs'),
-            'scheduleCronJobs method should exist'
+            'scheduleCronJobs method should exist',
         );
 
         $reflection = new \ReflectionMethod(CronScheduler::class, 'scheduleCronJobs');
         $this->assertTrue(
             $reflection->isPublic(),
-            'scheduleCronJobs method should be public'
+            'scheduleCronJobs method should be public',
         );
     }
 
     /**
      * Test that the removed scheduleIntervalJobs method no longer exists
-     * This verifies the refactoring removed the old method
+     * This verifies the refactoring removed the old method.
      */
     public function testScheduleIntervalJobsMethodDoesNotExist(): void
     {
         $this->assertFalse(
             method_exists(CronScheduler::class, 'scheduleIntervalJobs'),
-            'scheduleIntervalJobs method should have been removed in refactoring'
+            'scheduleIntervalJobs method should have been removed in refactoring',
         );
     }
 
     /**
-     * Test CronScheduler extends the correct parent class
+     * Test CronScheduler extends the correct parent class.
      */
     public function testCronSchedulerExtendsScheduler(): void
     {
         $this->assertInstanceOf(
             \MultiFlexi\Scheduler::class,
             $this->scheduler,
-            'CronScheduler should extend Scheduler class'
+            'CronScheduler should extend Scheduler class',
         );
     }
 
     /**
-     * Test scheduleCronJobs return type is void
+     * Test scheduleCronJobs return type is void.
      */
     public function testScheduleCronJobsReturnsVoid(): void
     {
         $reflection = new \ReflectionMethod(CronScheduler::class, 'scheduleCronJobs');
         $returnType = $reflection->getReturnType();
-        
+
         $this->assertNotNull($returnType, 'scheduleCronJobs should have a return type');
         $this->assertEquals('void', $returnType->getName(), 'scheduleCronJobs should return void');
     }
 
     /**
      * Test that CronExpression is used for parsing cron expressions
-     * This validates the dependency on dragonmantank/cron-expression
+     * This validates the dependency on dragonmantank/cron-expression.
      */
     public function testCronExpressionDependency(): void
     {
         $this->assertTrue(
             class_exists(CronExpression::class),
-            'CronExpression class from dragonmantank/cron-expression should be available'
+            'CronExpression class from dragonmantank/cron-expression should be available',
         );
     }
 
     /**
-     * Test cron expression parsing for standard expressions
+     * Test cron expression parsing for standard expressions.
      */
     public function testCronExpressionParsing(): void
     {
@@ -148,24 +148,24 @@ class CronSchedulerTest extends TestCase
         foreach ($expressions as $expr) {
             $cron = new CronExpression($expr);
             $nextRun = $cron->getNextRunDate(new \DateTime(), 0, true);
-            
+
             $this->assertInstanceOf(
                 \DateTime::class,
                 $nextRun,
-                "Cron expression '{$expr}' should return a valid DateTime"
+                "Cron expression '{$expr}' should return a valid DateTime",
             );
         }
     }
 
     /**
      * Test handling of empty crontab expression
-     * When interv is 'c' (custom) but cron field is empty, should disable interval
+     * When interv is 'c' (custom) but cron field is empty, should disable interval.
      */
     public function testEmptyCrontabHandling(): void
     {
         // This test verifies the logic at lines 44-49
         $mockRunTemplate = $this->createMock(RunTemplate::class);
-        
+
         // Simulate empty cron field with interv = 'c'
         $runtemplateData = [
             'id' => 1,
@@ -182,7 +182,7 @@ class CronSchedulerTest extends TestCase
             ->method('updateToSQL')
             ->with(
                 ['interv' => 'n'],
-                ['id' => 1]
+                ['id' => 1],
             );
 
         // Expect warning message to be added
@@ -190,7 +190,7 @@ class CronSchedulerTest extends TestCase
             ->method('addStatusMessage')
             ->with(
                 $this->stringContains('Empty crontab'),
-                'warning'
+                'warning',
             );
 
         // Manually test the logic
@@ -202,13 +202,13 @@ class CronSchedulerTest extends TestCase
 
     /**
      * Test emoji retrieval for different interval types
-     * Verifies the new emoji functionality added in the refactoring
+     * Verifies the new emoji functionality added in the refactoring.
      */
     public function testEmojiRetrievalForIntervals(): void
     {
         // Test that RunTemplate::getIntervalEmoji is called for various intervals
         $intervals = ['i', 'h', 'd', 'w', 'm', 'y', 'c'];
-        
+
         foreach ($intervals as $interval) {
             // Verify that the method can be called without errors
             try {
@@ -216,14 +216,14 @@ class CronSchedulerTest extends TestCase
                 $this->assertIsString($emoji, "Emoji should be a string for interval '{$interval}'");
             } catch (\Throwable $e) {
                 // If method doesn't exist, test that we handle it gracefully
-                $this->markTestSkipped("RunTemplate::getIntervalEmoji not available: " . $e->getMessage());
+                $this->markTestSkipped('RunTemplate::getIntervalEmoji not available: '.$e->getMessage());
             }
         }
     }
 
     /**
      * Test delay modification to start time
-     * Verifies lines 61-64 where delay is added to start time
+     * Verifies lines 61-64 where delay is added to start time.
      */
     public function testDelayModificationToStartTime(): void
     {
@@ -232,22 +232,22 @@ class CronSchedulerTest extends TestCase
         $delay = 300; // 5 minutes
 
         $startTime->modify("+{$delay} seconds");
-        
+
         $this->assertNotEquals(
             $originalTime->format('Y-m-d H:i:s'),
             $startTime->format('Y-m-d H:i:s'),
-            'Start time should be modified when delay is applied'
+            'Start time should be modified when delay is applied',
         );
 
         $this->assertEquals(
             300,
             $startTime->getTimestamp() - $originalTime->getTimestamp(),
-            'Delay should add exactly 300 seconds'
+            'Delay should add exactly 300 seconds',
         );
     }
 
     /**
-     * Test that delay is not applied when empty
+     * Test that delay is not applied when empty.
      */
     public function testNoDelayWhenEmpty(): void
     {
@@ -263,13 +263,13 @@ class CronSchedulerTest extends TestCase
         $this->assertEquals(
             $originalTime->format('Y-m-d H:i:s'),
             $startTime->format('Y-m-d H:i:s'),
-            'Start time should not be modified when delay is empty'
+            'Start time should not be modified when delay is empty',
         );
     }
 
     /**
      * Test schedule comparison logic
-     * Verifies lines 68-69 where schedules are compared
+     * Verifies lines 68-69 where schedules are compared.
      */
     public function testScheduleComparisonLogic(): void
     {
@@ -279,20 +279,20 @@ class CronSchedulerTest extends TestCase
         $this->assertNotEquals(
             $scheduleAt,
             $lastSchedule,
-            'Different schedules should not be equal'
+            'Different schedules should not be equal',
         );
 
         $sameSchedule = '2024-01-01 12:00:00';
         $this->assertEquals(
             $scheduleAt,
             $sameSchedule,
-            'Same schedules should be equal'
+            'Same schedules should be equal',
         );
     }
 
     /**
      * Test date formatting for SQL storage
-     * Verifies line 66 format
+     * Verifies line 66 format.
      */
     public function testDateFormattingForSQL(): void
     {
@@ -302,19 +302,19 @@ class CronSchedulerTest extends TestCase
         $this->assertEquals(
             '2024-01-15 14:30:45',
             $formatted,
-            'Date should be formatted as Y-m-d H:i:s for SQL'
+            'Date should be formatted as Y-m-d H:i:s for SQL',
         );
 
         $this->assertMatchesRegularExpression(
             '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/',
             $formatted,
-            'Formatted date should match SQL datetime pattern'
+            'Formatted date should match SQL datetime pattern',
         );
     }
 
     /**
      * Test exception handling in job preparation
-     * Verifies lines 71-78 exception handling
+     * Verifies lines 71-78 exception handling.
      */
     public function testExceptionHandlingInJobPreparation(): void
     {
@@ -329,7 +329,7 @@ class CronSchedulerTest extends TestCase
             ->method('addStatusMessage')
             ->with(
                 'Test error message',
-                'error'
+                'error',
             );
 
         // Simulate exception handling
@@ -341,7 +341,7 @@ class CronSchedulerTest extends TestCase
     }
 
     /**
-     * Test handling of various throwable types
+     * Test handling of various throwable types.
      */
     public function testVariousThrowableTypes(): void
     {
@@ -353,20 +353,21 @@ class CronSchedulerTest extends TestCase
 
         foreach ($throwables as $throwable) {
             $caught = false;
+
             try {
                 throw $throwable;
             } catch (\Throwable $t) {
                 $caught = true;
                 $this->assertIsString($t->getMessage());
             }
-            
+
             $this->assertTrue($caught, 'Throwable should be caught');
         }
     }
 
     /**
      * Test ConfigFields instantiation with empty string
-     * Verifies line 72 usage
+     * Verifies line 72 usage.
      */
     public function testConfigFieldsInstantiation(): void
     {
@@ -375,16 +376,16 @@ class CronSchedulerTest extends TestCase
             $this->assertInstanceOf(
                 ConfigFields::class,
                 $configFields,
-                'ConfigFields should be instantiable with empty string'
+                'ConfigFields should be instantiable with empty string',
             );
         } catch (\Throwable $e) {
-            $this->markTestSkipped("ConfigFields class not available: " . $e->getMessage());
+            $this->markTestSkipped('ConfigFields class not available: '.$e->getMessage());
         }
     }
 
     /**
      * Test status message format with emoji
-     * Verifies the new format on line 75
+     * Verifies the new format on line 75.
      */
     public function testStatusMessageFormatWithEmoji(): void
     {
@@ -403,7 +404,7 @@ class CronSchedulerTest extends TestCase
             preg_quote($applicationName, '/'),
             preg_quote($templateName, '/'),
             $templateId,
-            preg_quote($companyName, '/')
+            preg_quote($companyName, '/'),
         );
 
         $actualMessage = sprintf(
@@ -414,30 +415,30 @@ class CronSchedulerTest extends TestCase
             $templateName,
             $templateId,
             $startTime->format(\DATE_RSS),
-            $companyName
+            $companyName,
         );
 
         $this->assertMatchesRegularExpression(
-            '/' . $expectedPattern . '/',
+            '/'.$expectedPattern.'/',
             $actualMessage,
-            'Status message should include emoji and follow expected format'
+            'Status message should include emoji and follow expected format',
         );
     }
 
     /**
      * Test interv field value validation
-     * Verifies line 40 condition
+     * Verifies line 40 condition.
      */
     public function testIntervFieldValidation(): void
     {
         // Test valid interv values
         $validValues = ['i', 'h', 'd', 'w', 'm', 'y', 'c'];
-        
+
         foreach ($validValues as $value) {
             $shouldProcess = ($value !== 'n');
             $this->assertTrue(
                 $shouldProcess,
-                "Interv value '{$value}' should be processed (not 'n')"
+                "Interv value '{$value}' should be processed (not 'n')",
             );
         }
 
@@ -446,13 +447,13 @@ class CronSchedulerTest extends TestCase
         $shouldNotProcess = ($noneValue !== 'n');
         $this->assertFalse(
             $shouldNotProcess,
-            "Interv value 'n' should not be processed"
+            "Interv value 'n' should not be processed",
         );
     }
 
     /**
      * Test cron expression for different interval types
-     * Verifies line 52 usage of $intervCron
+     * Verifies line 52 usage of $intervCron.
      */
     public function testIntervCronMapping(): void
     {
@@ -471,14 +472,14 @@ class CronSchedulerTest extends TestCase
             $this->assertInstanceOf(
                 CronExpression::class,
                 $cron,
-                "Interval '{$interval}' should map to valid cron expression"
+                "Interval '{$interval}' should map to valid cron expression",
             );
         }
     }
 
     /**
      * Test next run date calculation with allowCurrentDate parameter
-     * Verifies line 59 with parameters
+     * Verifies line 59 with parameters.
      */
     public function testNextRunDateCalculation(): void
     {
@@ -490,20 +491,20 @@ class CronSchedulerTest extends TestCase
         $this->assertInstanceOf(
             \DateTime::class,
             $nextRun,
-            'Should return DateTime object'
+            'Should return DateTime object',
         );
 
         // Next run should be at midnight
         $this->assertEquals(
             '00:00:00',
             $nextRun->format('H:i:s'),
-            'Next run for daily cron should be at midnight'
+            'Next run for daily cron should be at midnight',
         );
     }
 
     /**
      * Test RSS date format for status messages
-     * Verifies \DATE_RSS usage on line 75
+     * Verifies \DATE_RSS usage on line 75.
      */
     public function testRSSDateFormat(): void
     {
@@ -513,12 +514,12 @@ class CronSchedulerTest extends TestCase
         $this->assertMatchesRegularExpression(
             '/^[A-Z][a-z]{2}, \d{2} [A-Z][a-z]{2} \d{4} \d{2}:\d{2}:\d{2} [+-]\d{4}$/',
             $rssFormat,
-            'RSS format should match expected pattern'
+            'RSS format should match expected pattern',
         );
     }
 
     /**
-     * Test handling of null last_schedule value
+     * Test handling of null last_schedule value.
      */
     public function testNullLastScheduleHandling(): void
     {
@@ -527,15 +528,15 @@ class CronSchedulerTest extends TestCase
 
         // Simulate the comparison
         $shouldSchedule = ($scheduleAt !== $lastSchedule);
-        
+
         $this->assertTrue(
             $shouldSchedule,
-            'Should schedule when last_schedule is null'
+            'Should schedule when last_schedule is null',
         );
     }
 
     /**
-     * Test empty delay value handling
+     * Test empty delay value handling.
      */
     public function testEmptyDelayValues(): void
     {
@@ -543,43 +544,43 @@ class CronSchedulerTest extends TestCase
 
         foreach ($emptyValues as $delay) {
             $isEmpty = empty($delay);
-            
+
             // Only non-zero positive integers should be considered non-empty for delay
             if ($delay === 0 || $delay === '0') {
                 $this->assertTrue(
                     $isEmpty,
-                    "Delay value {$delay} should be considered empty"
+                    "Delay value {$delay} should be considered empty",
                 );
             }
         }
     }
 
     /**
-     * Test that job scheduling handles edge cases around midnight
+     * Test that job scheduling handles edge cases around midnight.
      */
     public function testMidnightEdgeCases(): void
     {
         $cron = new CronExpression('0 0 * * *'); // Daily at midnight
-        
+
         // Test at 23:59:59
         $beforeMidnight = new \DateTime('2024-01-01 23:59:59');
         $nextRun = $cron->getNextRunDate($beforeMidnight, 0, false);
-        
+
         $this->assertEquals(
             '2024-01-02',
             $nextRun->format('Y-m-d'),
-            'Next run after 23:59:59 should be next day'
+            'Next run after 23:59:59 should be next day',
         );
 
         // Test at 00:00:00
         $atMidnight = new \DateTime('2024-01-01 00:00:00');
         $nextRunFromMidnight = $cron->getNextRunDate($atMidnight, 0, true);
-        
+
         $this->assertNotNull($nextRunFromMidnight);
     }
 
     /**
-     * Test large delay values don't cause overflow
+     * Test large delay values don't cause overflow.
      */
     public function testLargeDelayValues(): void
     {
@@ -587,16 +588,16 @@ class CronSchedulerTest extends TestCase
         $largeDelay = 86400; // 1 day in seconds
 
         $startTime->modify("+{$largeDelay} seconds");
-        
+
         $this->assertEquals(
             '2024-01-02',
             $startTime->format('Y-m-d'),
-            'Large delay should be handled correctly'
+            'Large delay should be handled correctly',
         );
     }
 
     /**
-     * Test cron expression with specific minute intervals
+     * Test cron expression with specific minute intervals.
      */
     public function testCronMinuteIntervals(): void
     {
@@ -612,23 +613,23 @@ class CronSchedulerTest extends TestCase
             $now = new \DateTime();
             $next1 = $cron->getNextRunDate($now);
             $next2 = $cron->getNextRunDate($next1);
-            
+
             $diff = $next2->getTimestamp() - $next1->getTimestamp();
-            
+
             // Extract interval from expression
             preg_match('/\*\/(\d+)/', $expr, $matches);
-            $expectedDiff = (int)$matches[1] * 60;
-            
+            $expectedDiff = (int) $matches[1] * 60;
+
             $this->assertEquals(
                 $expectedDiff,
                 $diff,
-                "Interval for '{$expr}' should be {$expectedDiff} seconds"
+                "Interval for '{$expr}' should be {$expectedDiff} seconds",
             );
         }
     }
 
     /**
-     * Test timezone handling in date operations
+     * Test timezone handling in date operations.
      */
     public function testTimezoneHandling(): void
     {
@@ -638,7 +639,7 @@ class CronSchedulerTest extends TestCase
         $this->assertEquals(
             '2024-01-01 12:00:00',
             $formatted,
-            'UTC date should format correctly'
+            'UTC date should format correctly',
         );
 
         // Test timezone conversion doesn't affect SQL format
@@ -646,7 +647,7 @@ class CronSchedulerTest extends TestCase
         $this->assertMatchesRegularExpression(
             '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/',
             $utcDate->format('Y-m-d H:i:s'),
-            'Formatted date should maintain SQL format regardless of timezone'
+            'Formatted date should maintain SQL format regardless of timezone',
         );
     }
 }
