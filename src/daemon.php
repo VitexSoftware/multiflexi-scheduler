@@ -61,57 +61,9 @@ $scheduler->logBanner(sprintf(_('MultiFlexi Schedule Daemon %s started'), \Ease\
 
 date_default_timezone_set('Europe/Prague');
 
-// Výchozí časy pro další spuštění jednotlivých úloh
-$nextMinute = (new \DateTime())->modify('+1 minute')->setTime((int) date('H'), (int) date('i') + 1, 0);
-$nextHour = (new \DateTime())->modify('+1 hour')->setTime((int) date('H') + 1, 0, 0);
-$nextDay = (new \DateTime('tomorrow'))->setTime(0, 0, 0);
-$nextWeek = clone $nextDay;
-
-while ((int) $nextWeek->format('N') !== 1) {
-    $nextWeek->modify('+1 day');
-}
-
-$nextMonth = (new \DateTime('first day of next month'))->setTime(0, 0, 0);
-$nextYear = (new \DateTime('first day of January next year'))->setTime(0, 0, 0);
-
 do {
-    $now = new \DateTime();
-
-    if ($now >= $nextMinute) { // Minutely
-        $nextMinute->modify('+1 minute');
-        $scheduler->scheduleIntervalJobs('i');
-    }
-
-    if ($now >= $nextHour) { // Hourly
-        $nextHour->modify('+1 hour');
-        $scheduler->scheduleIntervalJobs('h');
-    }
-
-    if ($now >= $nextDay) { // Daily
-        $nextDay->modify('+1 day');
-        $scheduler->scheduleIntervalJobs('d');
-
-        if ((int) $now->format('w') === 0) { // Weekly
-            $nextWeek->modify('+7 days');
-            $scheduler->scheduleIntervalJobs('w');
-        }
-
-        $tomorrow = (clone $now)->modify('+1 day');
-
-        if ((int) $tomorrow->format('j') === 1) { // Monthly
-            $nextMonth = (new \DateTime('first day of next month'))->setTime(0, 0, 0);
-            $scheduler->scheduleIntervalJobs('m');
-        }
-
-        if ((int) $tomorrow->format('z') === 0) { // Yearly
-            $nextYear = (new \DateTime('first day of January next year'))->setTime(0, 0, 0);
-            $scheduler->scheduleIntervalJobs('y');
-        }
-    }
-
     $scheduler->scheduleCronJobs();
-
-    usleep(100_000); // 0.1 sekundy, šetří CPU
+    sleep(1);
 } while ($daemonize);
 
 $scheduler->logBanner('MultiFlexi Daemon ended');
