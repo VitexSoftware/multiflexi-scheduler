@@ -58,7 +58,10 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
                 $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
 
-                $scheduleAt = $startTime->format('Y-m-d H:i:s');
+                $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
+
+ if (empty($runtemplateData['delay']) === false) {
+     $startTime->modify('+'.$runtemplateData['delay'].' seconds');
 
                 if (empty($runtemplateData['delay']) === false) {
                     $startTime->modify('+'.$runtemplateData['delay'].' seconds');
