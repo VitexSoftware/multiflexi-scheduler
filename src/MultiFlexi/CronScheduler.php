@@ -34,7 +34,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
-            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'next_schedule', 'interv'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
+            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
 
             foreach ($appsForCompany as $runtemplateData) {
                 $emoji = RunTemplate::getIntervalEmoji($runtemplateData['interv']);
@@ -57,8 +57,6 @@ class CronScheduler extends \MultiFlexi\Scheduler
                 $cron = new CronExpression($runtemplateData['cron']);
 
                 $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
-
-                $scheduleAt = $startTime->format('Y-m-d H:i:s');
 
                 if (empty($runtemplateData['delay']) === false) {
                     $startTime->modify('+'.$runtemplateData['delay'].' seconds');
