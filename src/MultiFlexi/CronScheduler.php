@@ -34,46 +34,44 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
-            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null]);
+            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'next_schedule', 'interv'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
 
             foreach ($appsForCompany as $runtemplateData) {
-                if ($runtemplateData['interv'] !== 'n') {
-                    $emoji = RunTemplate::getIntervalEmoji($runtemplateData['interv']);
+                $emoji = RunTemplate::getIntervalEmoji($runtemplateData['interv']);
 
-                    if ($runtemplateData['interv'] === 'c' && empty($runtemplateData['cron'])) {
+                if ($runtemplateData['interv'] === 'c') {
+                    if (empty($runtemplateData['cron'])) {
                         $runtemplate->updateToSQL(['interv' => 'n'], ['id' => $runtemplateData['id']]);
-                        $runtemplate->addStatusMessage($emoji.' '._('Empty crontab. Disabling interval').' #'.$runtemplateData['id'], 'warning');
+                        $runtemplate->addStatusMessage(_('Empty crontab. Disabling interval').' #'.$runtemplateData['id'], 'warning');
 
                         continue;
                     }
+                } else {
+                    $this->setDataValue($this->nameColumn, $emoji.' '.$this->getDataValue($this->nameColumn));
+                    $runtemplateData['cron'] = self::$intervCron[$runtemplateData['interv']];
+                }
 
-                    if ($runtemplateData['interv'] !== 'c') {
-                        $runtemplateData['cron'] = self::$intervCron[$runtemplateData['interv']];
-                    }
+                $runtemplate->setData($runtemplateData);
+                $runtemplate->setObjectName();
 
-                    $runtemplate->setData($runtemplateData);
+                $cron = new CronExpression($runtemplateData['cron']);
 
-                    $cron = new CronExpression($runtemplateData['cron']);
+                $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
 
-                    $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
+                $scheduleAt = $startTime->format('Y-m-d H:i:s');
 
-                    if (empty($runtemplateData['delay']) === false) {
-                        $startTime->modify('+'.$runtemplateData['delay'].' seconds');
-                        $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
-                    }
+                if (empty($runtemplateData['delay']) === false) {
+                    $startTime->modify('+'.$runtemplateData['delay'].' seconds');
+                    $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
+                }
 
-                    $scheduleAt = $startTime->format('Y-m-d H:i:s');
+                try {
+                    $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
+                    $jobber->scheduleJobRun($startTime);
 
-                    if ($scheduleAt !== $runtemplateData['last_schedule']) {
-                        try {
-                            $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
-                            $jobber->scheduleJobRun($startTime);
-
-                            $jobber->addStatusMessage($emoji.'🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
-                        } catch (\Throwable $t) {
-                            $this->addStatusMessage($t->getMessage(), 'error');
-                        }
-                    }
+                    $jobber->addStatusMessage($emoji.'🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
+                } catch (\Throwable $t) {
+                    $this->addStatusMessage($t->getMessage(), 'error');
                 }
             }
         }
