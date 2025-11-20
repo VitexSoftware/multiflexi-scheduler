@@ -1,24 +1,59 @@
 # WARP.md - Working AI Reference for multiflexi-scheduler
 
 ## Project Overview
-**Type**: PHP Project/Debian Package
-**Purpose**: Shchedule MultiFlexi jobs
+**Type**: PHP Project/Debian Package - Systemd Service
+**Purpose**: MultiFlexi job scheduling daemon (v2.x+)
 **Status**: Active
 **Repository**: git@github.com:VitexSoftware/multiflexi-scheduler.git
 
 ## Key Technologies
-- PHP
+- PHP 8.2+
 - Composer
+- Systemd service
+- dragonmantank/cron-expression library
 - Debian Packaging
 
 ## Architecture & Structure
 ```
 multiflexi-scheduler/
-├── src/           # Source code
+├── src/
+│   ├── daemon.php           # Main daemon entry point
+│   ├── scheduler.php        # Legacy/manual execution
+│   └── MultiFlexi/
+│       └── CronScheduler.php  # Scheduling logic
+├── debian/
+│   ├── multiflexi-scheduler.service  # Systemd unit file
+│   └── multiflexi-scheduler.postinst # Service installation
 ├── tests/         # Test files
-├── docs/          # Documentation
-└── ...
+└── docs/          # Documentation
 ```
+
+## Service Architecture (v2.x+)
+
+The scheduler runs as a continuous systemd service (``multiflexi-scheduler.service``) under the ``multiflexi`` user:
+
+- **Service file**: ``/lib/systemd/system/multiflexi-scheduler.service``
+- **Executable**: ``/usr/lib/multiflexi-scheduler/daemon.php``
+- **Configuration**: ``/etc/multiflexi/multiflexi.env``
+
+### How It Works
+
+1. Daemon runs continuously in a loop
+2. Each cycle calls ``CronScheduler::scheduleCronJobs()``
+3. Queries database for active RunTemplates (``active=true``, ``next_schedule=null``, ``interv != 'n'``)
+4. For each RunTemplate:
+   - Determines cron expression (custom or converted from interval shorthand)
+   - Calculates next run time using dragonmantank/cron-expression
+   - Applies optional startup delay
+   - Creates Job record via ``Job::prepareJob()``
+   - Inserts into ``schedule`` table with timestamp
+5. Sleep 1 second between cycles (configurable)
+
+### Configuration Options
+
+- ``MULTIFLEXI_DAEMONIZE=true``: Run continuously (default) or exit after one cycle
+- Standard MultiFlexi database settings (``DB_*``)
+- Logging configuration via ``EASE_LOGGER``
 
 ## Development Workflow
 
