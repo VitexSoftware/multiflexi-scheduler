@@ -79,7 +79,7 @@ if ($interval) {
                 }
 
                 $jobber->prepareJob($runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
-                $jobber->scheduleJobRun($startTime);
+                // scheduleJobRun() is now called automatically inside prepareJob()
                 $jobber->addStatusMessage($emoji.' 🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
             }
 
