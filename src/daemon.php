@@ -31,7 +31,7 @@ if (strtolower(\Ease\Shared::cfg('APP_DEBUG', 'false')) === 'true') {
 }
 
 \define('EASE_LOGGER', implode('|', $loggers));
-\Ease\Shared::user(new \Ease\Anonym());
+\Ease\Shared::user(new \MultiFlexi\UnixUser());
 
 function waitForDatabase(): void
 {
