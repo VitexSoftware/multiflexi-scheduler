@@ -15,7 +15,6 @@ declare(strict_types=1);
 
 namespace MultiFlexi;
 
-use Ease\Anonym;
 use Ease\Shared;
 
 date_default_timezone_set('Europe/Prague');
@@ -35,7 +34,9 @@ if (strtolower(Shared::cfg('APP_DEBUG', 'False')) === 'true') {
 \define('EASE_LOGGER', implode('|', $loggers));
 $interval = $argc === 2 ? $argv[1] : null;
 \define('APP_NAME', 'MultiFlexi scheduler '.RunTemplate::codeToInterval($interval));
-Shared::user(new Anonym());
+
+new \MultiFlexi\Defaults();
+\Ease\Shared::user(new \MultiFlexi\UnixUser());
 
 $jobber = new Job();
 
