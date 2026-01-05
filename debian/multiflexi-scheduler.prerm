@@ -1,6 +1,38 @@
 #!/bin/sh
-# If no user provided script is activated in this file, you should remove this file.
 set -e
+
+PKG="${DPKG_MAINTSCRIPT_PACKAGE:-multiflexi-scheduler}"
+BASE_DIR="/usr/lib/multiflexi-scheduler"
+
+case "$1" in
+	remove|upgrade|deconfigure)
+		# Clean non-packaged files so dpkg can remove the directory without warnings.
+		if [ -d "$BASE_DIR" ]; then
+			PKG_FILES="$(dpkg -L "$PKG" 2>/dev/null || true)"
+			# Remove anything under BASE_DIR that is not owned by the package.
+			find "$BASE_DIR" -mindepth 1 -print0 | while IFS= read -r -d '' path; do
+				if echo "$PKG_FILES" | grep -Fxq "$path"; then
+					: # owned by package, keep
+				else
+					rm -rf "$path" || true
+				fi
+			done
+			# Remove empty directories left behind.
+			find "$BASE_DIR" -type d -empty -delete || true
+		fi
+		;;
+
+	purge)
+		# On purge, remove the whole directory.
+		if [ -d "$BASE_DIR" ]; then
+			rm -rf "$BASE_DIR" || true
+		fi
+		;;
+
+	*)
+		# No-op for other actions.
+		;;
+esac
 
 #DEBHELPER#
 
