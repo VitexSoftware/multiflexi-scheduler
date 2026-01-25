@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="console-application">
+  <id>cz.vitexsoftware.multiflexi_scheduler</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>multiflexi-scheduler</name>
+  <summary>Schedule MultiFlexi jobs</summary>
+  <description>
+    <p>
+      MultiFlexi Scheduler automates and manages MultiFlexi job scheduling. It enables users to define, queue, and execute tasks flexibly and efficiently, supporting integration with various backends and databases. The scheduler is suitable for environments where reliable and customizable job execution is required, providing logging, error handling, and monitoring capabilities to ensure smooth operation of scheduled processes.
+    </p>
+  </description>
+  <categories>
+    <category>System</category>
+    <category>ConsoleOnly</category>
+  </categories>
+  <url type="homepage">https://github.com/VitexSoftware/multiflexi-scheduler</url>
+  <url type="bugtracker">https://github.com/VitexSoftware/multiflexi-scheduler/issues</url>
+  <developer id="cz.vitexsoftware">
+    <name>VitexSoftware</name>
+  </developer>
+  <provides>
+    <binary>multiflexi-scheduler</binary>
+  </provides>
+  <content_rating type="oars-1.1"/>
+</component>
