@@ -29,20 +29,21 @@ class CronScheduler extends \MultiFlexi\Scheduler
         $companer = new Company();
         $companies = $companer->listingQuery();
         $jobber = new Job();
-        $runtemplate = new \MultiFlexi\RunTemplate();
-        $runtemplate->lastModifiedColumn = null;
+        $runtemplateQuery = new \MultiFlexi\RunTemplate();
+        $runtemplateQuery->lastModifiedColumn = null;
 
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
-            $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
+            $appsForCompany = $runtemplateQuery->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
 
             foreach ($appsForCompany as $runtemplateData) {
+                $runtemplate = new \MultiFlexi\RunTemplate();
                 $emoji = RunTemplate::getIntervalEmoji($runtemplateData['interv']);
 
                 if ($runtemplateData['interv'] === 'c') {
                     if (empty($runtemplateData['cron'])) {
-                        $runtemplate->updateToSQL(['interv' => 'n'], ['id' => $runtemplateData['id']]);
-                        $runtemplate->addStatusMessage(_('Empty crontab. Disabling interval').' #'.$runtemplateData['id'], 'warning');
+                        $runtemplateQuery->updateToSQL(['interv' => 'n'], ['id' => $runtemplateData['id']]);
+                        $runtemplateQuery->addStatusMessage(_('Empty crontab. Disabling interval').' #'.$runtemplateData['id'], 'warning');
 
                         continue;
                     }
@@ -64,7 +65,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
                 }
 
                 try {
-                    $jobber->prepareJob((int) $runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
+                    $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
                     // scheduleJobRun() is now called automatically inside prepareJob()
 
                     $jobber->addStatusMessage($emoji.'🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));

@@ -63,7 +63,26 @@ $scheduler->logBanner(sprintf(_('MultiFlexi Schedule Daemon %s started'), \Ease\
 date_default_timezone_set('Europe/Prague');
 
 do {
-    $scheduler->scheduleCronJobs();
+    try {
+        $scheduler->scheduleCronJobs();
+    } catch (\PDOException $e) {
+        error_log('Database connection lost: '.$e->getMessage());
+        error_log('Attempting to reconnect...');
+
+        try {
+            waitForDatabase();
+            // Recreate scheduler to get fresh connections
+            $scheduler = new CronScheduler();
+            $scheduler->addStatusMessage('Database connection restored', 'success');
+        } catch (\Throwable $reconnectError) {
+            error_log('Failed to reconnect: '.$reconnectError->getMessage());
+            sleep(10);
+        }
+    } catch (\Throwable $e) {
+        error_log('Error in scheduler: '.$e->getMessage());
+        $scheduler->addStatusMessage('Error: '.$e->getMessage(), 'error');
+    }
+
     sleep(1);
 } while ($daemonize);
 
