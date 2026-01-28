@@ -65,6 +65,10 @@ class CronScheduler extends \MultiFlexi\Scheduler
                 }
 
                 try {
+                    if (empty($runtemplateData['company_id'])) {
+                        $this->addStatusMessage(sprintf(_('Runtemplate #%d has no company_id in scheduleCronJobs'), $runtemplateData['id']), 'warning');
+                    }
+
                     $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
                     // scheduleJobRun() is now called automatically inside prepareJob()
 

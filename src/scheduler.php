@@ -33,7 +33,7 @@ if (strtolower(Shared::cfg('APP_DEBUG', 'False')) === 'true') {
 
 \define('EASE_LOGGER', implode('|', $loggers));
 $interval = $argc === 2 ? $argv[1] : null;
-\define('APP_NAME', 'MultiFlexi scheduler '.RunTemplate::codeToInterval($interval));
+\define('APP_NAME', 'MultiFlexi scheduler '.Scheduler::codeToInterval($interval));
 
 new \MultiFlexi\Defaults();
 \Ease\Shared::user(new \MultiFlexi\UnixUser());
@@ -79,13 +79,14 @@ if ($interval) {
                     $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
                 }
 
-                $jobber->prepareJob($runtemplateData['id'], new ConfigFields(''), $startTime, $runtemplateData['executor'], RunTemplate::codeToInterval($interval));
+                $runtemplate->setData($runtemplateData);
+                $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], Scheduler::codeToInterval($interval));
                 // scheduleJobRun() is now called automatically inside prepareJob()
                 $jobber->addStatusMessage($emoji.' 🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
             }
 
             if (Shared::cfg('APP_DEBUG') === 'true') {
-                $jobber->addStatusMessage($emoji.' '.sprintf(_('%s Scheduler interval %s end'), $company['name'], RunTemplate::codeToInterval($interval)), 'debug');
+                $jobber->addStatusMessage($emoji.' '.sprintf(_('%s Scheduler interval %s end'), $company['name'], Scheduler::codeToInterval($interval)), 'debug');
             }
         }
     }
