@@ -34,7 +34,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
-            $appsForCompany = $runtemplateQuery->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
+            $appsForCompany = $runtemplateQuery->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv', 'app_id', 'company_id'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
 
             foreach ($appsForCompany as $runtemplateData) {
                 $runtemplate = new \MultiFlexi\RunTemplate();
