@@ -38,7 +38,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
             foreach ($appsForCompany as $runtemplateData) {
                 $runtemplate = new \MultiFlexi\RunTemplate();
-                $emoji = RunTemplate::getIntervalEmoji($runtemplateData['interv']);
+                $emoji = \MultiFlexi\Scheduler::getIntervalEmoji($runtemplateData['interv']);
 
                 if ($runtemplateData['interv'] === 'c') {
                     if (empty($runtemplateData['cron'])) {

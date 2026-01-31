@@ -52,7 +52,7 @@ $companer = new Company();
 $companies = $companer->listingQuery();
 
 if ($interval) {
-    $emoji = RunTemplate::getIntervalEmoji($interval);
+    $emoji = \MultiFlexi\Scheduler::getIntervalEmoji($interval);
     $runtemplate = new \MultiFlexi\RunTemplate();
 
     foreach ($companies as $company) {
