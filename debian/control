@@ -18,7 +18,7 @@ Multi-Arch: foreign
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
- multiflexi-sqlite | multiflexi-database,
+ multiflexi-sqlite (>= 2.4.1) | multiflexi-database (>= 2.4.1),
  php-vitexsoftware-multiflexi-core
 Description: Schedule MultiFlexi jobs
  MultiFlexi Scheduler automates and manages MultiFlexi job scheduling.
