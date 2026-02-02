@@ -32,11 +32,26 @@ class CronScheduler extends \MultiFlexi\Scheduler
         $runtemplateQuery = new \MultiFlexi\RunTemplate();
         $runtemplateQuery->lastModifiedColumn = null;
 
+        $rtFields = ['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv', 'app_id', 'company_id'];
+
         foreach ($companies as $company) {
             LogToSQL::singleton()->setCompany($company['id']);
-            $appsForCompany = $runtemplateQuery->getColumnsFromSQL(['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv', 'app_id', 'company_id'], ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
+
+            $appsForCompany = $runtemplateQuery->getColumnsFromSQL($rtFields, ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
 
             foreach ($appsForCompany as $runtemplateData) {
+                // Check if there's already a pending scheduled job for this runtemplate
+                // (exclude adhoc jobs by checking if schedule field is not null)
+                $existingJob = $jobber->listingQuery()
+                    ->where(['runtemplate_id' => $runtemplateData['id'], 'exitcode' => null])
+                    ->where('schedule IS NOT NULL')
+                    ->fetch();
+
+                if ($existingJob) {
+                    // Skip if there's already a pending scheduled job for this runtemplate
+                    continue;
+                }
+
                 $runtemplate = new \MultiFlexi\RunTemplate();
                 $emoji = \MultiFlexi\Scheduler::getIntervalEmoji($runtemplateData['interv']);
 
