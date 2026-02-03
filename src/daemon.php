@@ -86,6 +86,7 @@ do {
         $scheduler->addStatusMessage('Error: '.$e->getMessage(), 'error');
     }
 
+    $scheduler->cleanSatatusMessages();
     sleep(1);
 } while ($daemonize);
 
