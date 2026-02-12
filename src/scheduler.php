@@ -33,7 +33,7 @@ if (strtolower(Shared::cfg('APP_DEBUG', 'False')) === 'true') {
 
 \define('EASE_LOGGER', implode('|', $loggers));
 $interval = $argc === 2 ? $argv[1] : null;
-\define('APP_NAME', 'MultiFlexi scheduler '.Scheduler::codeToInterval($interval));
+\define('APP_NAME', 'Schedule MultiFlexi RunTemplate');
 
 new \MultiFlexi\Defaults();
 \Ease\Shared::user(new \MultiFlexi\UnixUser());

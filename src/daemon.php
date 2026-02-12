@@ -76,13 +76,13 @@ do {
             waitForDatabase();
             // Recreate scheduler to get fresh connections
             $scheduler = new CronScheduler();
-            
+
             // Test the connection before claiming it's restored
             try {
                 $scheduler->listingQuery()->select('1')->fetch();
                 $scheduler->addStatusMessage('Database connection restored', 'success');
             } catch (\Throwable $testError) {
-                throw new \Exception('Connection test failed: ' . $testError->getMessage());
+                throw new \Exception('Connection test failed: '.$testError->getMessage());
             }
         } catch (\Throwable $reconnectError) {
             error_log('Failed to reconnect: '.$reconnectError->getMessage());
