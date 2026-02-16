@@ -26,8 +26,10 @@ class CronScheduler extends \MultiFlexi\Scheduler
 {
     public function scheduleCronJobs(): void
     {
+        $this->addStatusMessage('scheduleCronJobs() entry; memory: '.memory_get_usage(true), 'debug');
         $companer = new Company();
         $companies = $companer->listingQuery();
+        $this->addStatusMessage('Companies listing obtained', 'debug');
         $jobber = new Job();
         $runtemplateQuery = new \MultiFlexi\RunTemplate();
         $runtemplateQuery->lastModifiedColumn = null;
@@ -35,11 +37,13 @@ class CronScheduler extends \MultiFlexi\Scheduler
         $rtFields = ['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv', 'app_id', 'company_id'];
 
         foreach ($companies as $company) {
+            $this->addStatusMessage('Processing company #'.$company['id'].' memory: '.memory_get_usage(true), 'debug');
             LogToSQL::singleton()->setCompany($company['id']);
 
             $appsForCompany = $runtemplateQuery->getColumnsFromSQL($rtFields, ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
 
             foreach ($appsForCompany as $runtemplateData) {
+                $this->addStatusMessage('Considering runtemplate #'.$runtemplateData['id'], 'debug');
                 // Check if there's already a pending scheduled job for this runtemplate
                 // (exclude adhoc jobs by checking if schedule field is not null)
                 $existingJob = $jobber->listingQuery()
@@ -49,6 +53,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
                 if ($existingJob) {
                     // Skip if there's already a pending scheduled job for this runtemplate
+                    $this->addStatusMessage('Skipping runtemplate #'.$runtemplateData['id'].' - existing pending job', 'debug');
                     continue;
                 }
 
@@ -80,6 +85,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
                 }
 
                 try {
+                    $this->addStatusMessage('Preparing job for runtemplate #'.$runtemplateData['id'].' start: '.$startTime->format('Y-m-d H:i:s'), 'debug');
                     if (empty($runtemplateData['company_id'])) {
                         $this->addStatusMessage(sprintf(_('Runtemplate #%d has no company_id in scheduleCronJobs'), $runtemplateData['id']), 'warning');
                     }
@@ -88,10 +94,13 @@ class CronScheduler extends \MultiFlexi\Scheduler
                     // scheduleJobRun() is now called automatically inside prepareJob()
 
                     $jobber->addStatusMessage($emoji.'🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
+                    $this->addStatusMessage('Job prepared for runtemplate #'.$runtemplateData['id'].' memory: '.memory_get_usage(true), 'debug');
                 } catch (\Throwable $t) {
                     $this->addStatusMessage($t->getMessage(), 'error');
                 }
             }
+            $this->addStatusMessage('Finished processing company #'.$company['id'].' memory: '.memory_get_usage(true), 'debug');
         }
+        $this->addStatusMessage('scheduleCronJobs() exit; memory: '.memory_get_usage(true), 'debug');
     }
 }

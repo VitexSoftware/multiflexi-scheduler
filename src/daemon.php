@@ -67,23 +67,28 @@ date_default_timezone_set('Europe/Prague');
 
 do {
     try {
+        $scheduler->addStatusMessage('Starting scheduleCronJobs', 'debug');
         $scheduler->scheduleCronJobs();
+        $scheduler->addStatusMessage('Finished scheduleCronJobs; memory: '.memory_get_usage(true), 'debug');
     } catch (\PDOException $e) {
         error_log('Database connection lost: '.$e->getMessage());
         error_log('Attempting to reconnect...');
 
-        try {
+            try {
+                $scheduler->addStatusMessage('Attempting DB reconnect (waitForDatabase)', 'debug');
             waitForDatabase();
             // Recreate scheduler to get fresh connections
             $scheduler = new CronScheduler();
 
             // Test the connection before claiming it's restored
-            try {
-                $scheduler->listingQuery()->select('1')->fetch();
-                $scheduler->addStatusMessage('Database connection restored', 'success');
-            } catch (\Throwable $testError) {
-                throw new \Exception('Connection test failed: '.$testError->getMessage());
-            }
+                try {
+                    $scheduler->listingQuery()->select('1')->fetch();
+                    $scheduler->addStatusMessage('Database connection restored', 'success');
+                    $scheduler->addStatusMessage('Post-reconnect memory: '.memory_get_usage(true), 'debug');
+                } catch (\Throwable $testError) {
+                    $scheduler->addStatusMessage('Connection test failed: '.$testError->getMessage(), 'debug');
+                    throw new \Exception('Connection test failed: '.$testError->getMessage());
+                }
         } catch (\Throwable $reconnectError) {
             error_log('Failed to reconnect: '.$reconnectError->getMessage());
             sleep(10);
