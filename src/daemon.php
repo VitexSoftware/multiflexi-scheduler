@@ -56,6 +56,25 @@ function waitForDatabase(): void
     }
 }
 
+/**
+ * Format bytes into human readable string (KB, MB, GB).
+ */
+function formatBytes(int $bytes): string
+{
+    if ($bytes < 1024) {
+        return $bytes.' B';
+    }
+    $units = ['KB', 'MB', 'GB', 'TB'];
+    $bytes = $bytes / 1024;
+    foreach ($units as $unit) {
+        if ($bytes < 1024) {
+            return sprintf('%.2f %s', $bytes, $unit);
+        }
+        $bytes = $bytes / 1024;
+    }
+    return sprintf('%.2f PB', $bytes);
+}
+
 waitForDatabase();
 $scheduler = new CronScheduler();
 $scheduler->logBanner(sprintf(_('MultiFlexi Schedule Daemon %s started'), \Ease\Shared::appVersion()));
@@ -69,7 +88,7 @@ do {
     try {
         $scheduler->addStatusMessage('Starting scheduleCronJobs', 'debug');
         $scheduler->scheduleCronJobs();
-        $scheduler->addStatusMessage('Finished scheduleCronJobs; memory: '.memory_get_usage(true), 'debug');
+        $scheduler->addStatusMessage('Finished scheduleCronJobs; memory: '.formatBytes(memory_get_usage(true)), 'debug');
     } catch (\PDOException $e) {
         error_log('Database connection lost: '.$e->getMessage());
         error_log('Attempting to reconnect...');
@@ -84,7 +103,7 @@ do {
                 try {
                     $scheduler->listingQuery()->select('1')->fetch();
                     $scheduler->addStatusMessage('Database connection restored', 'success');
-                    $scheduler->addStatusMessage('Post-reconnect memory: '.memory_get_usage(true), 'debug');
+                    $scheduler->addStatusMessage('Post-reconnect memory: '.formatBytes(memory_get_usage(true)), 'debug');
                 } catch (\Throwable $testError) {
                     $scheduler->addStatusMessage('Connection test failed: '.$testError->getMessage(), 'debug');
                     throw new \Exception('Connection test failed: '.$testError->getMessage());

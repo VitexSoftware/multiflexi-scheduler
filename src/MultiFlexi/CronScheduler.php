@@ -26,7 +26,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 {
     public function scheduleCronJobs(): void
     {
-        $this->addStatusMessage('scheduleCronJobs() entry; memory: '.memory_get_usage(true), 'debug');
+        $this->addStatusMessage('scheduleCronJobs() entry; memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
         $companer = new Company();
         $companies = $companer->listingQuery();
         $this->addStatusMessage('Companies listing obtained', 'debug');
@@ -37,7 +37,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
         $rtFields = ['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv', 'app_id', 'company_id'];
 
         foreach ($companies as $company) {
-            $this->addStatusMessage('Processing company #'.$company['id'].' memory: '.memory_get_usage(true), 'debug');
+            $this->addStatusMessage('Processing company #'.$company['id'].' memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
             LogToSQL::singleton()->setCompany($company['id']);
 
             $appsForCompany = $runtemplateQuery->getColumnsFromSQL($rtFields, ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
@@ -94,13 +94,32 @@ class CronScheduler extends \MultiFlexi\Scheduler
                     // scheduleJobRun() is now called automatically inside prepareJob()
 
                     $jobber->addStatusMessage($emoji.'🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
-                    $this->addStatusMessage('Job prepared for runtemplate #'.$runtemplateData['id'].' memory: '.memory_get_usage(true), 'debug');
+                    $this->addStatusMessage('Job prepared for runtemplate #'.$runtemplateData['id'].' memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
                 } catch (\Throwable $t) {
                     $this->addStatusMessage($t->getMessage(), 'error');
                 }
             }
-            $this->addStatusMessage('Finished processing company #'.$company['id'].' memory: '.memory_get_usage(true), 'debug');
+            $this->addStatusMessage('Finished processing company #'.$company['id'].' memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
         }
-        $this->addStatusMessage('scheduleCronJobs() exit; memory: '.memory_get_usage(true), 'debug');
+        $this->addStatusMessage('scheduleCronJobs() exit; memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
+    }
+
+    /**
+     * Format bytes into human readable string (KB, MB, GB).
+     */
+    private function formatMemory(int $bytes): string
+    {
+        if ($bytes < 1024) {
+            return $bytes.' B';
+        }
+        $units = ['KB', 'MB', 'GB', 'TB'];
+        $bytes = $bytes / 1024;
+        foreach ($units as $unit) {
+            if ($bytes < 1024) {
+                return sprintf('%.2f %s', $bytes, $unit);
+            }
+            $bytes = $bytes / 1024;
+        }
+        return sprintf('%.2f PB', $bytes);
     }
 }
