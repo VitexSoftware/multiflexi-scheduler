@@ -13,11 +13,10 @@ Vcs-Git: https://github.com/VitexSoftware/multiflexi-scheduler.git
 Vcs-Browser: https://github.com/VitexSoftware/multiflexi-scheduler
 
 Package: multiflexi-scheduler
-Architecture: any
+Architecture: all
 Multi-Arch: foreign
 Depends:
  ${misc:Depends},
- ${shlibs:Depends},
  multiflexi-sqlite (>= 2.4.1) | multiflexi-mysql (>= 2.4.1) | multiflexi-pgsql (>= 2.4.1),
  php-vitexsoftware-multiflexi-core
 Description: Schedule MultiFlexi jobs
