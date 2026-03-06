@@ -3,3 +3,5 @@ bin/*                    usr/bin
 src/MultiFlexi/*.php	 usr/lib/multiflexi-scheduler/MultiFlexi
 src/*.php				 usr/lib/multiflexi-scheduler
 debian/autoload.php		 usr/lib/multiflexi-scheduler
+eu.multiflexi.multiflexi_scheduler.metainfo.xml /usr/share/metainfo/
+multiflexi-scheduler.svg    /usr/share/icons/hicolor/scalable/apps/
