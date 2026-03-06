@@ -4,24 +4,23 @@
  * Autoloader for Multi Flexi Scheduler
  */
 
+require_once '/usr/share/php/MultiFlexi/autoload.php';
+
 spl_autoload_register(function ($class) {
     // Project-specific namespace prefix
-    $prefix = 'Multiflexi\\';
+    $prefix = 'MultiFlexi\\';
 
     // Does the class use the namespace prefix?
     $len = strlen($prefix);
     if (strncmp($prefix, $class, $len) !== 0) {
         return;
     }
-    
-    // Get the relative class name
-    $relative_class = substr($class, $len);
-    
-    // Replace namespace separators with directory separators
-    $file = __DIR__ . '/../src/' . str_replace('\\', '/', $relative_class) . '.php';
 
-    // If the file exists, load it
-    if (file_exists($file)) {
-        require $file;
-    }
+    // Get the relative class name
+    $relativeClass = substr($class, $len);
+
+    // Replace namespace separators with directory separators
+    $relativePath = str_replace('\\', '/', $relativeClass) . '.php';
+
+    require_once        __DIR__ . '/MultiFlexi/' . $relativePath;
 });
