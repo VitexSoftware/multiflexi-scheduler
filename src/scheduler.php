@@ -20,6 +20,11 @@ use Ease\Shared;
 date_default_timezone_set('Europe/Prague');
 
 require_once '../vendor/autoload.php';
+
+if (file_exists('/usr/share/php/MultiFlexi/autoload.php')) {
+    require_once '/usr/share/php/MultiFlexi/autoload.php';
+}
+
 Shared::init(['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'], '../.env');
 $loggers = ['syslog', '\MultiFlexi\LogToSQL'];
 
