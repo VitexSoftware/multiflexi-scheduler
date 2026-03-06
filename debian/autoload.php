@@ -5,6 +5,7 @@
  */
 
 require_once '/usr/share/php/MultiFlexi/autoload.php';
+require_once '/usr/share/php/Cron/autoload.php';
 
 spl_autoload_register(function ($class) {
     // Project-specific namespace prefix

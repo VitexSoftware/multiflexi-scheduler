@@ -18,7 +18,8 @@ Multi-Arch: foreign
 Depends:
  ${misc:Depends},
  multiflexi-sqlite (>= 2.4.1) | multiflexi-mysql (>= 2.4.1) | multiflexi-pgsql (>= 2.4.1),
- php-vitexsoftware-multiflexi-core
+ php-vitexsoftware-multiflexi-core,
+ php-dragonmantank-cron-expression
 Description: Schedule MultiFlexi jobs
  MultiFlexi Scheduler automates and manages MultiFlexi job scheduling.
  It enables users to define, queue, and execute tasks flexibly and efficiently,
