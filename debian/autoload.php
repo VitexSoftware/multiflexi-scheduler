@@ -23,5 +23,9 @@ spl_autoload_register(function ($class) {
     // Replace namespace separators with directory separators
     $relativePath = str_replace('\\', '/', $relativeClass) . '.php';
 
-    require_once        __DIR__ . '/MultiFlexi/' . $relativePath;
+    // Check if file exists locally before requiring it
+    $file = __DIR__ . '/MultiFlexi/' . $relativePath;
+    if (file_exists($file)) {
+        require_once $file;
+    }
 });

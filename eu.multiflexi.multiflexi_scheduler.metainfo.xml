@@ -1,26 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="service">
   <id>eu.multiflexi.multiflexi_scheduler</id>
-  
-  <name>multiflexi-scheduler</name>
-  <summary> Shchedule MultiFlexi jobs </summary>
-  
+
+  <name>MultiFlexi Scheduler</name>
+  <summary>Schedule MultiFlexi jobs</summary>
+
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
-  
+
+  <developer id="cz.vitexsoftware">
+    <name>Vitex Software</name>
+  </developer>
+
   <description>
     <p>
-      multiflexi-scheduler runs scheduled tasks for the MultiFlexi platform, triggering configured jobs on a defined cadence (minute, hourly, daily, or custom schedules).
+      MultiFlexi Scheduler automates and manages MultiFlexi job scheduling.
+      It enables users to define, queue, and execute tasks flexibly and
+      efficiently, supporting integration with various backends and databases.
+    </p>
+    <p>
+      The scheduler is suitable for environments where reliable and
+      customizable job execution is required, providing logging, error
+      handling, and monitoring capabilities to ensure smooth operation of
+      scheduled processes.
     </p>
   </description>
-  
-  <launchable type="service">multiflexi-scheduler</launchable>
-  
-  <icon type="stock">multiflexi-scheduler</icon>
-  
+
+  <launchable type="service">multiflexi-scheduler.service</launchable>
+
+  <url type="homepage">https://multiflexi.eu</url>
+  <url type="bugtracker">https://github.com/VitexSoftware/multiflexi-scheduler/issues</url>
+  <url type="vcs-browser">https://github.com/VitexSoftware/multiflexi-scheduler</url>
+
+  <content_rating type="oars-1.1" />
+
+  <provides>
+    <binary>multiflexi-scheduler</binary>
+  </provides>
+
   <categories>
     <category>System</category>
-    <category>Adult</category>
   </categories>
 </component>
 
