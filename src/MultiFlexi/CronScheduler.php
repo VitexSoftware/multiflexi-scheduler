@@ -26,7 +26,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 {
     public function scheduleCronJobs(): void
     {
-        $this->addStatusMessage('scheduleCronJobs() entry; memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
+        $this->addStatusMessage('scheduleCronJobs() entry; memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
         $companer = new Company();
         $companies = $companer->listingQuery();
         $this->addStatusMessage('Companies listing obtained', 'debug');
@@ -37,7 +37,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
         $rtFields = ['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv', 'app_id', 'company_id'];
 
         foreach ($companies as $company) {
-            $this->addStatusMessage('Processing company #'.$company['id'].' memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
+            $this->addStatusMessage('Processing company #'.$company['id'].' memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
             LogToSQL::singleton()->setCompany($company['id']);
 
             $appsForCompany = $runtemplateQuery->getColumnsFromSQL($rtFields, ['company_id' => $company['id'], 'active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
@@ -54,6 +54,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
                 if ($existingJob) {
                     // Skip if there's already a pending scheduled job for this runtemplate
                     $this->addStatusMessage('Skipping runtemplate #'.$runtemplateData['id'].' - existing pending job', 'debug');
+
                     continue;
                 }
 
@@ -86,6 +87,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
                 try {
                     $this->addStatusMessage('Preparing job for runtemplate #'.$runtemplateData['id'].' start: '.$startTime->format('Y-m-d H:i:s'), 'debug');
+
                     if (empty($runtemplateData['company_id'])) {
                         $this->addStatusMessage(sprintf(_('Runtemplate #%d has no company_id in scheduleCronJobs'), $runtemplateData['id']), 'warning');
                     }
@@ -93,33 +95,39 @@ class CronScheduler extends \MultiFlexi\Scheduler
                     $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
                     // scheduleJobRun() is now called automatically inside prepareJob()
 
-                    $jobber->addStatusMessage($emoji.'🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
-                    $this->addStatusMessage('Job prepared for runtemplate #'.$runtemplateData['id'].' memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
+                    $jobber->addStatusMessage($emoji.'🧩 #'.$jobber->getApplication()->getMyKey()."\t".$jobber->getApplication()->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
+                    $this->addStatusMessage('Job prepared for runtemplate #'.$runtemplateData['id'].' memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
                 } catch (\Throwable $t) {
                     $this->addStatusMessage($t->getMessage(), 'error');
                 }
             }
-            $this->addStatusMessage('Finished processing company #'.$company['id'].' memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
+
+            $this->addStatusMessage('Finished processing company #'.$company['id'].' memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
         }
-        $this->addStatusMessage('scheduleCronJobs() exit; memory: '. $this->formatMemory(memory_get_usage(true)), 'debug');
+
+        $this->addStatusMessage('scheduleCronJobs() exit; memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
     }
 
     /**
      * Format bytes into human readable string (KB, MB, GB).
      */
-    private function formatMemory(int $bytes): string
+    private static function formatMemory(int $bytes): string
     {
         if ($bytes < 1024) {
             return $bytes.' B';
         }
+
         $units = ['KB', 'MB', 'GB', 'TB'];
-        $bytes = $bytes / 1024;
+        $bytes /= 1024;
+
         foreach ($units as $unit) {
             if ($bytes < 1024) {
                 return sprintf('%.2f %s', $bytes, $unit);
             }
-            $bytes = $bytes / 1024;
+
+            $bytes /= 1024;
         }
+
         return sprintf('%.2f PB', $bytes);
     }
 }

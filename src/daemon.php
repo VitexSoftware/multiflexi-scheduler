@@ -64,14 +64,18 @@ function formatBytes(int $bytes): string
     if ($bytes < 1024) {
         return $bytes.' B';
     }
+
     $units = ['KB', 'MB', 'GB', 'TB'];
-    $bytes = $bytes / 1024;
+    $bytes /= 1024;
+
     foreach ($units as $unit) {
         if ($bytes < 1024) {
             return sprintf('%.2f %s', $bytes, $unit);
         }
-        $bytes = $bytes / 1024;
+
+        $bytes /= 1024;
     }
+
     return sprintf('%.2f PB', $bytes);
 }
 
@@ -93,21 +97,22 @@ do {
         error_log('Database connection lost: '.$e->getMessage());
         error_log('Attempting to reconnect...');
 
-            try {
-                $scheduler->addStatusMessage('Attempting DB reconnect (waitForDatabase)', 'debug');
+        try {
+            $scheduler->addStatusMessage('Attempting DB reconnect (waitForDatabase)', 'debug');
             waitForDatabase();
             // Recreate scheduler to get fresh connections
             $scheduler = new CronScheduler();
 
             // Test the connection before claiming it's restored
-                try {
-                    $scheduler->listingQuery()->select('1')->fetch();
-                    $scheduler->addStatusMessage('Database connection restored', 'success');
-                    $scheduler->addStatusMessage('Post-reconnect memory: '.formatBytes(memory_get_usage(true)), 'debug');
-                } catch (\Throwable $testError) {
-                    $scheduler->addStatusMessage('Connection test failed: '.$testError->getMessage(), 'debug');
-                    throw new \Exception('Connection test failed: '.$testError->getMessage());
-                }
+            try {
+                $scheduler->listingQuery()->select('1')->fetch();
+                $scheduler->addStatusMessage('Database connection restored', 'success');
+                $scheduler->addStatusMessage('Post-reconnect memory: '.formatBytes(memory_get_usage(true)), 'debug');
+            } catch (\Throwable $testError) {
+                $scheduler->addStatusMessage('Connection test failed: '.$testError->getMessage(), 'debug');
+
+                throw new \Exception('Connection test failed: '.$testError->getMessage());
+            }
         } catch (\Throwable $reconnectError) {
             error_log('Failed to reconnect: '.$reconnectError->getMessage());
             sleep(10);
