@@ -19,6 +19,8 @@ override_dh_install:
 		debian/multiflexi-scheduler/usr/lib/multiflexi-scheduler/autoload.php
 	sed -i "s|: 'unknown'|: '$(PKG_SOURCE)'|" \\
 		debian/multiflexi-scheduler/usr/lib/multiflexi-scheduler/autoload.php
+	sed -i "s|: '0.0.0'|: '$(PKG_VERSION)'|" \\
+		debian/multiflexi-scheduler/usr/lib/multiflexi-scheduler/autoload.php
 	sed -i "2a defined('APP_VERSION') || define('APP_VERSION', '$(PKG_VERSION)');" \
 		debian/multiflexi-scheduler/usr/lib/multiflexi-scheduler/autoload.php
 	sed -i -e 's/.\.\/vendor/\/usr\/lib\/multiflexi-scheduler/g' debian/multiflexi-scheduler*/usr/lib/multiflexi-scheduler/*.php
