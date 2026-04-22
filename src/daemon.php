@@ -81,7 +81,7 @@ function formatBytes(int $bytes): string
 
 waitForDatabase();
 $scheduler = new CronScheduler();
-$scheduler->logBanner(sprintf(_('MultiFlexi Schedule Daemon %s started'), \Ease\Shared::appVersion()));
+$scheduler->logBanner(sprintf(_('MultiFlexi Schedule Daemon %s started. Core Libs: %s'), \Ease\Shared::appVersion(), \Composer\InstalledVersions::getPrettyVersion('vitexsoftware/multiflexi-core')));
 $scheduler->cleanupOrphanedJobs();
 $scheduler->purgeBrokenQueueRecords();
 $scheduler->initializeScheduling();
