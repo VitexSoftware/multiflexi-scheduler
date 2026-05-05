@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="console-application">
   <id>cz.vitexsoftware.multiflexi_scheduler</id>
+  <icon type="stock">multiflexi-scheduler</icon>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
   <name>multiflexi-scheduler</name>
