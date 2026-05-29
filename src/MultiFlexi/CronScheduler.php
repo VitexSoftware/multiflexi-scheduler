@@ -44,19 +44,6 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
             foreach ($appsForCompany as $runtemplateData) {
                 $this->addStatusMessage('Considering runtemplate #'.$runtemplateData['id'], 'debug');
-                // Check if there's already a pending scheduled job for this runtemplate
-                // (exclude adhoc jobs by checking if schedule field is not null)
-                $existingJob = $jobber->listingQuery()
-                    ->where(['runtemplate_id' => $runtemplateData['id'], 'exitcode' => null])
-                    ->where('schedule IS NOT NULL')
-                    ->fetch();
-
-                if ($existingJob) {
-                    // Skip if there's already a pending scheduled job for this runtemplate
-                    $this->addStatusMessage('Skipping runtemplate #'.$runtemplateData['id'].' - existing pending job', 'debug');
-
-                    continue;
-                }
 
                 $runtemplate = new \MultiFlexi\RunTemplate();
                 $emoji = \MultiFlexi\Scheduler::getIntervalEmoji($runtemplateData['interv']);
