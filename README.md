@@ -4,6 +4,10 @@ Schedule MultiFlexi jobs.
 
 multiflexi-scheduler runs scheduled tasks for the MultiFlexi platform, triggering configured jobs on a defined cadence (minute, hourly, daily, or custom schedules).
 
+## Single-instance protection
+
+The scheduler daemon acquires an exclusive `flock` lock on a pidfile (`$TMPDIR/multiflexi-scheduler.pid`) at startup. If a second instance is launched while the first is already running, it exits immediately with an error logged to syslog. This prevents the same RunTemplate from being queued twice when a scheduler restart or misconfigured cron overlaps an already-running daemon process.
+
 ![Scheduler Logo](multiflexi-scheduler.svg?raw=true)
 
 ## MultiFlexi

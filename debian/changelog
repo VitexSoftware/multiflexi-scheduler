@@ -1,8 +1,11 @@
-multiflexi-scheduler (2.2.0) UNRELEASED; urgency=medium
+multiflexi-scheduler (2.2.0) stable; urgency=medium
 
   * auloader update
+  * Prevent double job scheduling with exclusive flock-based pidfile guard
+  * Add unit test verifying single-instance daemon protection
+  * Document single-instance guard in README
 
- -- vitex <info@vitexsoftware.cz>  Fri, 06 Mar 2026 21:07:19 +0100
+ -- vitex <info@vitexsoftware.cz>  Mon, 02 Jun 2026 08:00:00 +0200
 
 multiflexi-scheduler (2.1.4) stable; urgency=medium
 
