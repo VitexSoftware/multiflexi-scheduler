@@ -79,6 +79,19 @@ function formatBytes(int $bytes): string
     return sprintf('%.2f PB', $bytes);
 }
 
+$pidFile = sys_get_temp_dir().'/multiflexi-scheduler.pid';
+$lockFp = fopen($pidFile, 'c');
+
+if ($lockFp === false || !flock($lockFp, \LOCK_EX | \LOCK_NB)) {
+    error_log('Another multiflexi-scheduler instance is already running. Exiting.');
+
+    exit(1);
+}
+
+ftruncate($lockFp, 0);
+fwrite($lockFp, (string) getmypid());
+fflush($lockFp);
+
 waitForDatabase();
 $scheduler = new CronScheduler();
 $scheduler->logBanner(sprintf(_('MultiFlexi Schedule Daemon %s started. Core Libs: %s'), \Ease\Shared::appVersion(), \Composer\InstalledVersions::getPrettyVersion('vitexsoftware/multiflexi-core')));
