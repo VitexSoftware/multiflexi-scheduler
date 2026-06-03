@@ -1,0 +1,109 @@
+.TH MULTIFLEXI\-SCHEDULER 8 "June 2026" "multiflexi-scheduler 2.2.0" "MultiFlexi"
+.SH NAME
+multiflexi\-scheduler \- schedule MultiFlexi jobs by interval
+.SH SYNOPSIS
+.B multiflexi\-scheduler
+.I INTERVAL
+.SH DESCRIPTION
+.B multiflexi\-scheduler
+queries the MultiFlexi database for all active RunTemplates whose interval
+matches
+.I INTERVAL
+and enqueues a job for each of them.
+It is intended to be called from a cron job or a systemd timer once per
+interval period.
+.PP
+For continuous, cron-expression-based scheduling see the
+.B multiflexi\-scheduler\-daemon
+systemd service, which runs
+.B daemon.php
+in the background and handles custom cron expressions natively.
+.SH INTERVALS
+.TP
+.B i
+Every minute
+.TP
+.B h
+Every hour
+.TP
+.B d
+Every day
+.TP
+.B w
+Every week
+.TP
+.B m
+Every month
+.TP
+.B y
+Every year
+.SH OPTIONS
+No additional options are supported.
+The interval character is the sole positional argument.
+.SH ENVIRONMENT
+Configuration is read from
+.I /etc/multiflexi/multiflexi.env
+(or a
+.I .env
+file one level above the script).
+.TP
+.B DB_CONNECTION
+Database driver:
+.BR mysql ", " pgsql ", " sqlite " (default: mysql)"
+.TP
+.B DB_HOST
+Database host (default:
+.BR localhost )
+.TP
+.B DB_PORT
+Database port
+.TP
+.B DB_DATABASE
+Database name
+.TP
+.B DB_USERNAME
+Database user
+.TP
+.B DB_PASSWORD
+Database password
+.TP
+.B APP_DEBUG
+Set to
+.B true
+to enable verbose console logging.
+.SH EXIT STATUS
+.TP
+.B 0
+Interval argument missing or no matching RunTemplates found.
+.TP
+.B 1
+Interval argument missing (usage error).
+.SH DAEMON
+The long-running daemon variant is managed by systemd:
+.PP
+.RS
+.nf
+systemctl start multiflexi-scheduler
+systemctl enable multiflexi-scheduler
+.fi
+.RE
+.PP
+The daemon acquires an exclusive lock on
+.I $TMPDIR/multiflexi-scheduler.pid
+at startup.
+If a second instance is launched while the first is running it exits
+immediately, preventing the same RunTemplate from being scheduled twice.
+.SH FILES
+.TP
+.I /etc/multiflexi/multiflexi.env
+Runtime environment configuration.
+.TP
+.I /usr/lib/multiflexi-scheduler/daemon.php
+Continuous scheduling daemon (custom cron expressions).
+.TP
+.I /usr/lib/multiflexi-scheduler/scheduler.php
+One-shot interval scheduler called by this binary.
+.SH SEE ALSO
+.BR multiflexi-executor (8)
+.SH AUTHOR
+Vítězslav Dvořák <info@vitexsoftware.cz>

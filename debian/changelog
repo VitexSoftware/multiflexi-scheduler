@@ -1,3 +1,9 @@
+multiflexi-scheduler (2.2.1) UNRELEASED; urgency=low
+
+  * Add man page for multiflexi-scheduler (section 8)
+
+ -- vitex <info@vitexsoftware.cz>  Tue, 03 Jun 2026 08:00:00 +0200
+
 multiflexi-scheduler (2.2.0) stable; urgency=medium
 
   * auloader update
