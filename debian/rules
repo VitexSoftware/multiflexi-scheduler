@@ -13,7 +13,7 @@ PKG_SOURCE  := $(shell jq -r '.name' composer.json)
 
 override_dh_install:
 	mkdir -p debian/tmp/
-	jq '.version = "'`dpkg-parsechangelog | sed -n 's/^Version: //p'| sed 's/~.*//'`'"'  debian/conf/composer.json |sponge debian/tmp/composer.json
+	jq '.version = "'`dpkg-parsechangelog | sed -n 's/^Version: //p'| sed 's/~.*//'`'"'  composer.json |sponge debian/tmp/composer.json
 	dh_install
 	sed -i "s|'unknown'|'$(PKG_SOURCE)'|" debian/multiflexi-scheduler/usr/lib/multiflexi-scheduler/autoload.php
 	sed -i "s|'0.0.0'|'$(PKG_VERSION)'|"  debian/multiflexi-scheduler/usr/lib/multiflexi-scheduler/autoload.php
