@@ -65,7 +65,18 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
                 $cron = new CronExpression($runtemplateData['cron']);
 
-                $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
+                // If this runtemplate ran before, compute the next occurrence AFTER the
+                // last run so we never re-schedule for the same cron period. Without
+                // this guard, a fast job would finish, next_schedule would be reset to
+                // null, and the scheduler would immediately create another job for the
+                // same (already-past) cron firing, causing duplicate runs within one
+                // cron period.
+                if (!empty($runtemplateData['last_schedule'])) {
+                    $lastRun = new \DateTime($runtemplateData['last_schedule']);
+                    $startTime = $cron->getNextRunDate($lastRun, 0, false);
+                } else {
+                    $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
+                }
 
                 if (empty($runtemplateData['delay']) === false) {
                     $startTime->modify('+'.$runtemplateData['delay'].' seconds');
