@@ -1,6 +1,9 @@
 [Unit]
-Description=My Service
-After=network.target
+Description=MultiFlexi Scheduler
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=120s
+StartLimitBurst=5
 
 [Service]
 User=multiflexi
@@ -9,6 +12,8 @@ EnvironmentFile=/etc/multiflexi/multiflexi.env
 ExecStart=/usr/bin/php /usr/lib/multiflexi-scheduler/daemon.php
 LimitNOFILE=8192:16384
 Type=simple
+Restart=on-failure
+RestartSec=15s
 
 [Install]
 WantedBy=multi-user.target
