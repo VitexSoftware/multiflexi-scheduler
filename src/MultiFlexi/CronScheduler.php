@@ -28,6 +28,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
     public function scheduleCronJobs(): void
     {
         $this->addStatusMessage('scheduleCronJobs() entry; memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
+        \MultiFlexi\Task::finalizeExpired();
         $companer = new Company();
         $companies = $companer->listingQuery();
         $this->addStatusMessage('Companies listing obtained', 'debug');
@@ -79,9 +80,27 @@ class CronScheduler extends \MultiFlexi\Scheduler
                     $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
                 }
 
+                // Task tracking uses the cron-tick boundary as the window start,
+                // before the startup delay shifts the actual launch instant.
+                $windowStart = clone $startTime;
+
                 if (empty($runtemplateData['delay']) === false) {
                     $startTime->modify('+'.$runtemplateData['delay'].' seconds');
                     $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
+                }
+
+                // Only fixed-interval RunTemplates (y/m/w/d/h/i) have a well-defined
+                // cadence window; custom cron (interv = 'c') is not tracked as a Task.
+                $jobber->setDataValue('task_id', null);
+
+                if (\MultiFlexi\Scheduler::codeToSeconds($runtemplateData['interv']) > 0) {
+                    try {
+                        $task = \MultiFlexi\Task::findForWindow((int) $runtemplateData['id'], $windowStart)
+                            ?? \MultiFlexi\Task::materialize(new \MultiFlexi\RunTemplate((int) $runtemplateData['id']), $windowStart);
+                        $jobber->setDataValue('task_id', $task->getMyKey());
+                    } catch (\Throwable $taskError) {
+                        $this->addStatusMessage('Task materialization failed for runtemplate #'.$runtemplateData['id'].': '.$taskError->getMessage(), 'warning');
+                    }
                 }
 
                 try {

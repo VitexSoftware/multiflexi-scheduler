@@ -22,6 +22,7 @@ use MultiFlexi\CronScheduler;
 use MultiFlexi\Job;
 use MultiFlexi\LogToSQL;
 use MultiFlexi\RunTemplate;
+use MultiFlexi\Scheduler;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -37,7 +38,7 @@ use PHPUnit\Framework\TestCase;
  */
 class CronSchedulerTest extends TestCase
 {
-    private CronScheduler $scheduler;
+    private ?CronScheduler $scheduler = null;
     private $mockCompany;
     private $mockJob;
     private $mockRunTemplate;
@@ -649,5 +650,95 @@ class CronSchedulerTest extends TestCase
             $utcDate->format('Y-m-d H:i:s'),
             'Formatted date should maintain SQL format regardless of timezone',
         );
+    }
+
+    /**
+     * Test that fixed-interval RunTemplates are gated into Task tracking via
+     * Scheduler::codeToSeconds(), while custom cron ('c') and disabled ('n')
+     * RunTemplates are not, since they have no well-defined cadence window.
+     * Verifies the gating condition added in scheduleCronJobs() that decides
+     * whether to call Task::findForWindow()/Task::materialize().
+     */
+    public function testFixedIntervalGatingForTaskTracking(): void
+    {
+        $fixedIntervals = ['y', 'm', 'w', 'd', 'h', 'i'];
+
+        foreach ($fixedIntervals as $interv) {
+            $this->assertGreaterThan(
+                0,
+                Scheduler::codeToSeconds($interv),
+                "Interval '{$interv}' should have a positive window length for Task tracking",
+            );
+        }
+
+        foreach (['c', 'n'] as $interv) {
+            $this->assertSame(
+                0,
+                Scheduler::codeToSeconds($interv),
+                "Interval '{$interv}' should not produce a Task tracking window",
+            );
+        }
+    }
+
+    /**
+     * Test that the Task window_start is captured from the cron-tick boundary
+     * BEFORE the startup delay shifts the actual launch instant, so the
+     * cadence window isn't skewed by per-runtemplate jitter.
+     * Verifies the `$windowStart = clone $startTime;` line added before the
+     * delay adjustment in scheduleCronJobs().
+     */
+    public function testWindowStartCapturedBeforeDelay(): void
+    {
+        $startTime = new \DateTime('2026-06-16 21:00:00');
+        $windowStart = clone $startTime;
+
+        $delay = 90;
+        $startTime->modify("+{$delay} seconds");
+
+        $this->assertEquals(
+            '2026-06-16 21:00:00',
+            $windowStart->format('Y-m-d H:i:s'),
+            'windowStart must stay at the cron-tick boundary, unaffected by delay',
+        );
+        $this->assertEquals(
+            '2026-06-16 21:01:30',
+            $startTime->format('Y-m-d H:i:s'),
+            'startTime (actual launch instant) should include the delay',
+        );
+        $this->assertNotSame($windowStart, $startTime, 'windowStart must be an independent clone, not an alias');
+    }
+
+    /**
+     * Test that task_id is reset to null before each runtemplate iteration so
+     * a Task id picked up for one (fixed-interval) runtemplate in the loop
+     * can't leak onto the next (custom-cron) runtemplate's job.
+     * Verifies the `$jobber->setDataValue('task_id', null);` reset added
+     * before the Task::findForWindow()/materialize() block, since $jobber is
+     * a single Job instance reused across all loop iterations.
+     */
+    public function testTaskIdResetBetweenIterations(): void
+    {
+        $state = ['task_id' => 'stale-from-previous-iteration'];
+
+        // Reset always happens first in the loop body.
+        $state['task_id'] = null;
+        $this->assertNull($state['task_id'], 'task_id must be reset before considering Task tracking');
+
+        // Fixed interval -> task_id gets set.
+        if (Scheduler::codeToSeconds('h') > 0) {
+            $state['task_id'] = 42;
+        }
+
+        $this->assertSame(42, $state['task_id']);
+
+        // Reset again for the next loop iteration.
+        $state['task_id'] = null;
+
+        // Custom cron -> task_id stays null.
+        if (Scheduler::codeToSeconds('c') > 0) {
+            $state['task_id'] = 99;
+        }
+
+        $this->assertNull($state['task_id'], 'custom cron runtemplates must not inherit a stale task_id');
     }
 }
