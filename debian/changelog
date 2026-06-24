@@ -1,3 +1,10 @@
+multiflexi-scheduler (2.2.3) UNRELEASED; urgency=medium
+
+  * CronScheduler: materialize a Task per scheduling window before spawning Job
+  * CronScheduler: call Task::finalizeExpired() to close stale open/running tasks
+
+ -- vitex <info@vitexsoftware.cz>  Sat, 14 Jun 2026 10:00:00 +0200
+
 multiflexi-scheduler (2.2.2) UNRELEASED; urgency=low
 
   [ vitex ]

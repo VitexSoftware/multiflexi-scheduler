@@ -16,6 +16,7 @@ declare(strict_types=1);
 namespace MultiFlexi;
 
 use Cron\CronExpression;
+use MultiFlexi\Task;
 
 /**
  * Description of CronScheduler.
@@ -90,8 +91,28 @@ class CronScheduler extends \MultiFlexi\Scheduler
                         $this->addStatusMessage(sprintf(_('Runtemplate #%d has no company_id in scheduleCronJobs'), $runtemplateData['id']), 'warning');
                     }
 
+                    // Materialize a Task for this scheduling window (idempotent — skip if one exists)
+                    $windowStart = clone $startTime;
+
+                    if (!empty($runtemplateData['delay'])) {
+                        $windowStart->modify('-'.$runtemplateData['delay'].' seconds');
+                    }
+
+                    $existingTask = Task::findForWindow((int) $runtemplateData['id'], $windowStart);
+
+                    if ($existingTask === null) {
+                        $task = Task::materialize($runtemplate, $windowStart);
+                        $this->addStatusMessage('Task #'.$task->getMyKey().' materialized for runtemplate #'.$runtemplateData['id'], 'debug');
+                    } else {
+                        $task = $existingTask;
+                        $this->addStatusMessage('Reusing existing task #'.$task->getMyKey().' for runtemplate #'.$runtemplateData['id'], 'debug');
+                    }
+
+                    // Attach task_id before prepareJob so newJob() picks it up
+                    $jobber->setDataValue('task_id', $task->getMyKey());
                     $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
                     // scheduleJobRun() is now called automatically inside prepareJob()
+                    $task->markRunning();
 
                     $jobber->addStatusMessage($emoji.'🧩 #'.$jobber->getApplication()->getMyKey()."\t".$jobber->getApplication()->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
                     $this->addStatusMessage('Job prepared for runtemplate #'.$runtemplateData['id'].' memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
@@ -102,6 +123,9 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
             $this->addStatusMessage('Finished processing company #'.$company['id'].' memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
         }
+
+        // Finalize tasks whose window has expired without fulfilment
+        Task::finalizeExpired();
 
         $this->addStatusMessage('scheduleCronJobs() exit; memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
     }
