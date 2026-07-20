@@ -1,3 +1,14 @@
+multiflexi-scheduler (2.2.4) UNRELEASED; urgency=low
+
+  [ Vítězslav Dvořák ]
+  * Re-run initializeScheduling() periodically inside the daemon's main
+    loop (throttled, default 60s), not just once at startup, so a
+    RunTemplate whose next_schedule got stuck in the past (job crashed
+    before finish() could reset it) is not silently dropped from the
+    daily cron rotation for the lifetime of the long-running process.
+
+ -- Vítězslav Dvořák <info@vitexsoftware.cz>  Mon, 20 Jul 2026 15:45:00 +0200
+
 multiflexi-scheduler (2.2.3) UNRELEASED; urgency=low
 
   [ vitex ]
