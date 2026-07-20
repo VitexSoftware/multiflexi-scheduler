@@ -101,8 +101,21 @@ $scheduler->initializeScheduling();
 
 date_default_timezone_set('Europe/Prague');
 
+$initializeSchedulingIntervalSeconds = (int) \Ease\Shared::cfg('INITIALIZE_SCHEDULING_INTERVAL', 60);
+$lastInitializeScheduling = time();
+
 do {
     try {
+        // initializeScheduling() re-runs the once-at-startup healing check so a
+        // runtemplate whose next_schedule got stuck (job crashed before finish()
+        // could reset it) is not orphaned from the daily cron for the lifetime of
+        // this long-running daemon process.
+        if (time() - $lastInitializeScheduling >= $initializeSchedulingIntervalSeconds) {
+            $scheduler->addStatusMessage('Starting initializeScheduling', 'debug');
+            $scheduler->initializeScheduling();
+            $lastInitializeScheduling = time();
+        }
+
         $scheduler->addStatusMessage('Starting scheduleCronJobs', 'debug');
         $scheduler->scheduleCronJobs();
         $scheduler->addStatusMessage('Finished scheduleCronJobs; memory: '.formatBytes(memory_get_usage(true)), 'debug');
