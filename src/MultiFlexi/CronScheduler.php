@@ -129,7 +129,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
                     // Attach task_id before prepareJob so newJob() picks it up
                     $jobber->setDataValue('task_id', $task->getMyKey());
-                    $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], 'custom');
+                    $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], \MultiFlexi\Scheduler::codeToInterval($runtemplateData['interv']));
                     // scheduleJobRun() is now called automatically inside prepareJob()
                     $task->markRunning();
 
