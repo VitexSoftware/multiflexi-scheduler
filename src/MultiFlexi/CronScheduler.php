@@ -127,6 +127,21 @@ class CronScheduler extends \MultiFlexi\Scheduler
                         $this->addStatusMessage('Reusing existing task #'.$task->getMyKey().' for runtemplate #'.$runtemplateData['id'], 'debug');
                     }
 
+                    // Idempotency guard: whatever upstream condition made this runtemplate
+                    // a candidate again, never create a second job for the same slot while
+                    // one is still pending/running for it.
+                    $existingJob = (new \MultiFlexi\Job())->listingQuery()
+                        ->where('runtemplate_id', $runtemplateData['id'])
+                        ->where('schedule', $startTime->format('Y-m-d H:i:s'))
+                        ->where('exitcode IS NULL')
+                        ->fetch();
+
+                    if ($existingJob) {
+                        $this->addStatusMessage('Skipping duplicate job creation for runtemplate #'.$runtemplateData['id'].' at '.$startTime->format('Y-m-d H:i:s').' — job #'.$existingJob['id'].' already pending', 'warning');
+
+                        continue;
+                    }
+
                     // Attach task_id before prepareJob so newJob() picks it up
                     $jobber->setDataValue('task_id', $task->getMyKey());
                     $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], \MultiFlexi\Scheduler::codeToInterval($runtemplateData['interv']));
