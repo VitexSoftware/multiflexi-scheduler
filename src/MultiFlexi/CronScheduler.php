@@ -77,7 +77,23 @@ class CronScheduler extends \MultiFlexi\Scheduler
                     $lastRun = new \DateTime($runtemplateData['last_schedule']);
                     $startTime = $cron->getNextRunDate($lastRun, 0, false);
                 } else {
-                    $startTime = $cron->getNextRunDate(new \DateTime(), 0, true);
+                    // No last_schedule: anchor to the most recent period boundary
+                    // (not "now"), so a slot whose job/schedule row was lost (e.g.
+                    // queue:truncate) gets caught up instead of silently skipped to
+                    // the next boundary. Only skip ahead if a job already exists for
+                    // that exact slot — i.e. it was already attempted, pending or
+                    // finished — so a period that was genuinely already handled is
+                    // never recreated.
+                    $candidate = $cron->getPreviousRunDate(new \DateTime(), 0, true);
+
+                    $alreadyHandled = $jobber->listingQuery()
+                        ->where('runtemplate_id', $runtemplateData['id'])
+                        ->where('schedule', $candidate->format('Y-m-d H:i:s'))
+                        ->fetch();
+
+                    $startTime = $alreadyHandled
+                        ? $cron->getNextRunDate($candidate, 0, false)
+                        : $candidate;
                 }
 
                 // Task tracking uses the cron-tick boundary as the window start,
