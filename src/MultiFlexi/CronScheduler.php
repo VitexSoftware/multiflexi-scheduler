@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace MultiFlexi;
 
 use Cron\CronExpression;
-use MultiFlexi\Task;
 
 /**
  * Description of CronScheduler.
@@ -37,12 +36,12 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
         $rtFields = ['id', 'cron', 'delay', 'name', 'executor', 'last_schedule', 'interv', 'app_id', 'company_id'];
 
-        $appsForInterval = $runtemplateQuery->getColumnsFromSQL($rtFields, ['active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
+        $periodicRuntemplates = $runtemplateQuery->getColumnsFromSQL($rtFields, ['active' => true, 'next_schedule' => null, 'interv != ?' => 'n']);
 
-        foreach ($appsForInterval as $runtemplateData) {
+        foreach ($periodicRuntemplates as $runtemplateData) {
             $companyName = $companyNames[$runtemplateData['company_id']]['name'] ?? $runtemplateData['company_id'];
             LogToSQL::singleton()->setCompany($runtemplateData['company_id']);
-            $this->addStatusMessage('Considering runtemplate #'.$runtemplateData['id'], 'debug');
+            $this->addStatusMessage('Considering runtemplate #'.$runtemplateData['id'].' '.\MultiFlexi\CronDescriber::describe($runtemplateData['interv'], $runtemplateData['cron']), 'debug');
 
             $runtemplate = new \MultiFlexi\RunTemplate();
             $emoji = \MultiFlexi\Scheduler::getIntervalEmoji($runtemplateData['interv']);
@@ -54,6 +53,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
                     continue;
                 }
+
             } else {
                 $this->setDataValue($this->nameColumn, $emoji.' '.$this->getDataValue($this->nameColumn));
                 $runtemplateData['cron'] = self::$intervCron[$runtemplateData['interv']];
@@ -64,34 +64,16 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
             $cron = new CronExpression($runtemplateData['cron']);
 
-            // If this runtemplate ran before, compute the next occurrence AFTER the
-            // last run so we never re-schedule for the same cron period. Without
-            // this guard, a fast job would finish, next_schedule would be reset to
-            // null, and the scheduler would immediately create another job for the
-            // same (already-past) cron firing, causing duplicate runs within one
-            // cron period.
-            if (!empty($runtemplateData['last_schedule'])) {
-                $lastRun = new \DateTime($runtemplateData['last_schedule']);
-                $startTime = $cron->getNextRunDate($lastRun, 0, false);
-            } else {
-                // No last_schedule: anchor to the most recent period boundary
-                // (not "now"), so a slot whose job/schedule row was lost (e.g.
-                // queue:truncate) gets caught up instead of silently skipped to
-                // the next boundary. Only skip ahead if a job already exists for
-                // that exact slot — i.e. it was already attempted, pending or
-                // finished — so a period that was genuinely already handled is
-                // never recreated.
-                $candidate = $cron->getPreviousRunDate(new \DateTime(), 0, true);
+            $candidate = $cron->getPreviousRunDate(new \DateTime(), 0, true);
 
-                $alreadyHandled = $jobber->listingQuery()
-                    ->where('runtemplate_id', $runtemplateData['id'])
-                    ->where('schedule', $candidate->format('Y-m-d H:i:s'))
-                    ->fetch();
+            $alreadyHandled = $jobber->listingQuery()
+                ->where('runtemplate_id', $runtemplateData['id'])
+                ->where('schedule', $candidate->format('Y-m-d H:i:s'))
+                ->fetch();
 
-                $startTime = $alreadyHandled
-                    ? $cron->getNextRunDate($candidate, 0, false)
-                    : $candidate;
-            }
+            $startTime = $alreadyHandled
+                ? $cron->getNextRunDate($candidate, 0, false)
+                : $candidate;
 
             // Task tracking uses the cron-tick boundary as the window start,
             // before the startup delay shifts the actual launch instant.
@@ -104,7 +86,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
             // Only fixed-interval RunTemplates (y/m/w/d/h/i) have a well-defined
             // cadence window; custom cron (interv = 'c') is not tracked as a Task.
-            $jobber->setDataValue('task_id', null);
+            $jobber->setDataValue('task_id', null); // TODO:
 
             if (\MultiFlexi\Scheduler::codeToSeconds($runtemplateData['interv']) > 0) {
                 try {
@@ -151,6 +133,11 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
                 if ($existingJob) {
                     $this->addStatusMessage('Skipping duplicate job creation for runtemplate #'.$runtemplateData['id'].' at '.$startTime->format('Y-m-d H:i:s').' — job #'.$existingJob['id'].' already pending', 'warning');
+
+                    // The job itself is not recreated, but it must still show up in
+                    // `multiflexi queue:list` — addJob() is idempotent, so re-queuing
+                    // an already-scheduled job is a no-op that just confirms presence.
+                    (new \MultiFlexi\Job((int) $existingJob['id']))->scheduleJobRun($startTime);
 
                     continue;
                 }

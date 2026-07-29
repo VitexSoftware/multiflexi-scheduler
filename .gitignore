@@ -12,3 +12,4 @@ debian/files
 /debian/multiflexi-scheduler.debhelper.log
 /debian/multiflexi-scheduler.postrm.debhelper
 /debian/tmp/
+.phpunit.result.cache

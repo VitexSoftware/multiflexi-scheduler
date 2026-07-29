@@ -20,17 +20,21 @@ require_once '../vendor/autoload.php';
 \define('APP_NAME', 'MultiFlexi Schedule Daemon');
 \Ease\Shared::init(['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'], '../.env');
 $daemonize = (bool) \Ease\Shared::cfg('MULTIFLEXI_DAEMONIZE', true);
-$loggers = ['syslog', '\MultiFlexi\LogToSQL'];
 
-if (\Ease\Shared::cfg('ZABBIX_SERVER') && \Ease\Shared::cfg('ZABBIX_HOST') && class_exists('\MultiFlexi\LogToZabbix')) {
-    $loggers[] = '\MultiFlexi\LogToZabbix';
+if (\Ease\Shared::cfg('EASE_LOGGER', false) === false) {
+    $loggers = ['syslog', '\MultiFlexi\LogToSQL'];
+
+    if (\Ease\Shared::cfg('ZABBIX_SERVER') && \Ease\Shared::cfg('ZABBIX_HOST') && class_exists('\MultiFlexi\LogToZabbix')) {
+        $loggers[] = '\MultiFlexi\LogToZabbix';
+    }
+
+    if (strtolower(\Ease\Shared::cfg('APP_DEBUG', 'false')) === 'true') {
+        $loggers[] = 'console';
+    }
+
+    \define('EASE_LOGGER', implode('|', $loggers));
 }
 
-if (strtolower(\Ease\Shared::cfg('APP_DEBUG', 'false')) === 'true') {
-    $loggers[] = 'console';
-}
-
-\define('EASE_LOGGER', implode('|', $loggers));
 new \MultiFlexi\Defaults();
 \Ease\Shared::user(new \MultiFlexi\UnixUser());
 
@@ -85,7 +89,7 @@ set_error_handler(static function (int $errno, string $errstr): bool {
 });
 
 try {
-    $lockFp = fopen($pidFile, 'c');
+    $lockFp = fopen($pidFile, 'cb');
 } catch (\RuntimeException $e) {
     error_log('Cannot open pid file '.$pidFile.': '.$e->getMessage());
 

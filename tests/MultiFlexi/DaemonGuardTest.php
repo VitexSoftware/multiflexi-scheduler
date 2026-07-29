@@ -47,13 +47,13 @@ class DaemonGuardTest extends TestCase
     public function testFlockPreventsDoubleAcquisition(): void
     {
         $pidFile = sys_get_temp_dir().'/test-scheduler-lock-'.uniqid().'.pid';
-        $fp1 = fopen($pidFile, 'c');
+        $fp1 = fopen($pidFile, 'cb');
         $this->assertNotFalse($fp1, 'Should be able to open pidfile');
 
         $acquired = flock($fp1, \LOCK_EX | \LOCK_NB);
         $this->assertTrue($acquired, 'First instance should acquire the lock');
 
-        $fp2 = fopen($pidFile, 'c');
+        $fp2 = fopen($pidFile, 'cb');
         $this->assertNotFalse($fp2, 'Should be able to open pidfile a second time');
 
         $blocked = flock($fp2, \LOCK_EX | \LOCK_NB);
@@ -72,12 +72,12 @@ class DaemonGuardTest extends TestCase
     public function testFlockReleasedOnClose(): void
     {
         $pidFile = sys_get_temp_dir().'/test-scheduler-lock-'.uniqid().'.pid';
-        $fp1 = fopen($pidFile, 'c');
+        $fp1 = fopen($pidFile, 'cb');
         flock($fp1, \LOCK_EX | \LOCK_NB);
         flock($fp1, \LOCK_UN);
         fclose($fp1);
 
-        $fp2 = fopen($pidFile, 'c');
+        $fp2 = fopen($pidFile, 'cb');
         $reacquired = flock($fp2, \LOCK_EX | \LOCK_NB);
         $this->assertTrue($reacquired, 'Lock should be available after previous holder released it');
 

@@ -94,7 +94,7 @@ class DateTimeHelper
         // "UTC" via ini_get('date.timezone') even when nothing ever configured
         // it (it's the engine's own runtime fallback, not evidence of an
         // explicit admin choice) — trust OS-level detection above it instead.
-        $timezone = ini_get('date.timezone');
+        $timezone = \ini_get('date.timezone');
 
         if (!empty($timezone)) {
             try {
