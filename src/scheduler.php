@@ -52,46 +52,35 @@ if (\MultiFlexi\Runner::isServiceActive('multiflexi-executor') === false) {
     $jobber->addStatusMessage(_('systemd service is not running. Consider `systemctl start multiflexi-executor`'), 'warning');
 }
 
-$companer = new Company();
-$companies = $companer->listingQuery();
-
 if ($interval) {
     $emoji = \MultiFlexi\Scheduler::getIntervalEmoji($interval);
     $runtemplate = new \MultiFlexi\RunTemplate();
+    $companyNames = (new Company())->getColumnsFromSQL(['id', 'name'], null, null, 'id');
 
-    foreach ($companies as $company) {
-        LogToSQL::singleton()->setCompany($company['id']);
+    $appsForInterval = $runtemplate->getColumnsFromSQL(['id', 'interv', 'delay', 'name', 'executor', 'company_id'], ['interv' => $interval, 'active' => true]);
 
-        $appsForCompany = $runtemplate->getColumnsFromSQL(['id', 'interv', 'delay', 'name', 'executor'], ['company_id' => $company['id'], 'interv' => $interval, 'active' => true]);
+    foreach ($appsForInterval as $runtemplateData) {
+        $companyName = $companyNames[$runtemplateData['company_id']]['name'] ?? $runtemplateData['company_id'];
+        LogToSQL::singleton()->setCompany($runtemplateData['company_id']);
 
-        if (empty($appsForCompany) && ($interval !== 'i')) {
-            $companer->addStatusMessage($emoji.' '.sprintf(_('No applications to run for %s in interval %s'), $company['name'], $interval), 'debug');
-        } else {
-            if (strtolower(Shared::cfg('APP_DEBUG', 'false')) === 'true') {
-                $jobber->addStatusMessage($emoji.' '.sprintf(_('%s Scheduler interval %s begin'), $company['name'], \MultiFlexi\Scheduler::$intervCron[$interval].' ('.$interval.')'), 'debug');
-            }
+        if (strtolower(Shared::cfg('APP_DEBUG', 'false')) === 'true') {
+            $jobber->addStatusMessage($emoji.' '.sprintf(_('%s Scheduler interval %s begin'), $companyName, \MultiFlexi\Scheduler::$intervCron[$interval].' ('.$interval.')'), 'debug');
+        }
 
-            foreach ($appsForCompany as $runtemplateData) {
-                if (null !== $interval && ($interval !== $runtemplateData['interv'])) {
-                    continue;
-                }
+        $startTime = new \DateTime();
 
-                $startTime = new \DateTime();
+        if (empty($runtemplateData['delay']) === false) {
+            $startTime->modify('+'.$runtemplateData['delay'].' seconds');
+            $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
+        }
 
-                if (empty($runtemplateData['delay']) === false) {
-                    $startTime->modify('+'.$runtemplateData['delay'].' seconds');
-                    $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
-                }
+        $runtemplate->setData($runtemplateData);
+        $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], Scheduler::codeToInterval($interval));
+        // scheduleJobRun() is now called automatically inside prepareJob()
+        $jobber->addStatusMessage($emoji.' 🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $companyName));
 
-                $runtemplate->setData($runtemplateData);
-                $jobber->prepareJob($runtemplate, new ConfigFields(''), $startTime, $runtemplateData['executor'], Scheduler::codeToInterval($interval));
-                // scheduleJobRun() is now called automatically inside prepareJob()
-                $jobber->addStatusMessage($emoji.' 🧩 #'.$jobber->application->getMyKey()."\t".$jobber->application->getRecordName().':'.$runtemplateData['name'].' (runtemplate #'.$runtemplateData['id'].') - '.sprintf(_('Launch %s for 🏣 %s'), $startTime->format(\DATE_RSS), $company['name']));
-            }
-
-            if (Shared::cfg('APP_DEBUG') === 'true') {
-                $jobber->addStatusMessage($emoji.' '.sprintf(_('%s Scheduler interval %s end'), $company['name'], Scheduler::codeToInterval($interval)), 'debug');
-            }
+        if (Shared::cfg('APP_DEBUG') === 'true') {
+            $jobber->addStatusMessage($emoji.' '.sprintf(_('%s Scheduler interval %s end'), $companyName, Scheduler::codeToInterval($interval)), 'debug');
         }
     }
 } else {
