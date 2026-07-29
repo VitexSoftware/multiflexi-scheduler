@@ -79,11 +79,23 @@ function formatBytes(int $bytes): string
     return sprintf('%.2f PB', $bytes);
 }
 
-$pidFile = sys_get_temp_dir().'/multiflexi-scheduler.pid';
-$lockFp = fopen($pidFile, 'c');
+$pidFile = sys_get_temp_dir().'/multiflexi-scheduler-'.get_current_user().'.pid';
+set_error_handler(static function (int $errno, string $errstr): bool {
+    throw new \RuntimeException($errstr, $errno);
+});
 
-if ($lockFp === false || !flock($lockFp, \LOCK_EX | \LOCK_NB)) {
-    error_log('Another multiflexi-scheduler instance is already running. Exiting.');
+try {
+    $lockFp = fopen($pidFile, 'c');
+} catch (\RuntimeException $e) {
+    error_log('Cannot open pid file '.$pidFile.': '.$e->getMessage());
+
+    exit(1);
+} finally {
+    restore_error_handler();
+}
+
+if (!flock($lockFp, \LOCK_EX | \LOCK_NB)) {
+    error_log('Another multiflexi-scheduler instance is already running (pid file: '.$pidFile.'). Exiting.');
 
     exit(1);
 }
