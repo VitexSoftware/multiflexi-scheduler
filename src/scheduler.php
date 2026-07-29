@@ -17,8 +17,6 @@ namespace MultiFlexi;
 
 use Ease\Shared;
 
-date_default_timezone_set('Europe/Prague');
-
 require_once '../vendor/autoload.php';
 
 if (file_exists('/usr/share/php/MultiFlexi/autoload.php')) {
@@ -26,6 +24,7 @@ if (file_exists('/usr/share/php/MultiFlexi/autoload.php')) {
 }
 
 Shared::init(['DB_CONNECTION', 'DB_HOST', 'DB_PORT', 'DB_DATABASE', 'DB_USERNAME', 'DB_PASSWORD'], '../.env');
+date_default_timezone_set(DateTimeHelper::getConfiguredTimezoneString());
 $loggers = ['syslog', '\MultiFlexi\LogToSQL'];
 
 if (Shared::cfg('ZABBIX_SERVER') && Shared::cfg('ZABBIX_HOST') && class_exists('\MultiFlexi\LogToZabbix')) {

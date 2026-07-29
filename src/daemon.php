@@ -111,7 +111,7 @@ $scheduler->cleanupOrphanedJobs();
 $scheduler->purgeBrokenQueueRecords();
 $scheduler->initializeScheduling();
 
-date_default_timezone_set('Europe/Prague');
+date_default_timezone_set(DateTimeHelper::getConfiguredTimezoneString());
 
 $initializeSchedulingIntervalSeconds = (int) \Ease\Shared::cfg('INITIALIZE_SCHEDULING_INTERVAL', 60);
 $lastInitializeScheduling = time();
