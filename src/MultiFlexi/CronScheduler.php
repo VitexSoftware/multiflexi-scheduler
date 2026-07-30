@@ -63,12 +63,25 @@ class CronScheduler extends \MultiFlexi\Scheduler
             $runtemplate->setObjectName();
 
             $cron = new CronExpression($runtemplateData['cron']);
+            $delaySeconds = empty($runtemplateData['delay']) ? 0 : (int) $runtemplateData['delay'];
 
             $candidate = $cron->getPreviousRunDate(new \DateTime(), 0, true);
 
+            // job.schedule always stores the launch instant AFTER the startup
+            // delay is applied (see below), so the "already handled" check must
+            // compare against the same delayed instant — otherwise, for any
+            // runtemplate with delay > 0, this never matches the job it just
+            // created and the same day's occurrence is recreated on every tick
+            // instead of advancing to the next one.
+            $candidateWithDelay = clone $candidate;
+
+            if ($delaySeconds > 0) {
+                $candidateWithDelay->modify('+'.$delaySeconds.' seconds');
+            }
+
             $alreadyHandled = $jobber->listingQuery()
                 ->where('runtemplate_id', $runtemplateData['id'])
-                ->where('schedule', $candidate->format('Y-m-d H:i:s'))
+                ->where('schedule', $candidateWithDelay->format('Y-m-d H:i:s'))
                 ->fetch();
 
             $startTime = $alreadyHandled
@@ -79,9 +92,9 @@ class CronScheduler extends \MultiFlexi\Scheduler
             // before the startup delay shifts the actual launch instant.
             $windowStart = clone $startTime;
 
-            if (empty($runtemplateData['delay']) === false) {
-                $startTime->modify('+'.$runtemplateData['delay'].' seconds');
-                $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$runtemplateData['delay'].' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
+            if ($delaySeconds > 0) {
+                $startTime->modify('+'.$delaySeconds.' seconds');
+                $jobber->addStatusMessage($emoji.' Adding Startup delay  +'.$delaySeconds.' seconds to '.$startTime->format('Y-m-d H:i:s'), 'debug');
             }
 
             // Only fixed-interval RunTemplates (y/m/w/d/h/i) have a well-defined

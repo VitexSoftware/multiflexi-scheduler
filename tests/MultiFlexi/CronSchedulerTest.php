@@ -269,6 +269,42 @@ class CronSchedulerTest extends TestCase
     }
 
     /**
+     * Regression test for the "already handled" candidate/delay mismatch.
+     *
+     * scheduleCronJobs() stores job.schedule as (cron candidate + delay), but
+     * used to compare the "already handled" lookup against the undelayed
+     * candidate. For any runtemplate with delay > 0, that comparison could
+     * never match the job it had just created, so the same day's occurrence
+     * was recreated (and, since it was already overdue, immediately
+     * re-executed) on every daemon tick instead of advancing to the next
+     * cron occurrence once handled.
+     */
+    public function testAlreadyHandledComparisonMustUseDelayedCandidate(): void
+    {
+        $candidate = new \DateTime('2026-07-30 00:00:00');
+        $delaySeconds = 447; // e.g. runtemplate #159's staggering delay
+
+        $candidateWithDelay = clone $candidate;
+        $candidateWithDelay->modify('+'.$delaySeconds.' seconds');
+
+        // This is what actually ends up in job.schedule once prepareJob() runs.
+        $storedJobSchedule = clone $candidate;
+        $storedJobSchedule->modify('+'.$delaySeconds.' seconds');
+
+        $this->assertSame(
+            $storedJobSchedule->format('Y-m-d H:i:s'),
+            $candidateWithDelay->format('Y-m-d H:i:s'),
+            'The "already handled" lookup key must equal candidate + delay to ever match a previously created job.',
+        );
+
+        $this->assertNotSame(
+            $storedJobSchedule->format('Y-m-d H:i:s'),
+            $candidate->format('Y-m-d H:i:s'),
+            'Comparing against the undelayed candidate (the old, buggy behavior) never matches a job whose schedule includes the delay.',
+        );
+    }
+
+    /**
      * Test schedule comparison logic
      * Verifies lines 68-69 where schedules are compared.
      */
