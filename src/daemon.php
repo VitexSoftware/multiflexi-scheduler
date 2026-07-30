@@ -126,8 +126,17 @@ do {
         // runtemplate whose next_schedule got stuck (job crashed before finish()
         // could reset it) is not orphaned from the daily cron for the lifetime of
         // this long-running daemon process.
+        //
+        // purgeBrokenQueueRecords() and purgeImplausibleSchedules() used to run
+        // inside Scheduler::addJob() on every single job creation, which made a
+        // full schedule-table scan race against scheduleCronJobs() ticking every
+        // ~1s (a freshly inserted schedule row could be read back as "referencing
+        // missing job" and deleted before it was ever observed in queue:list).
+        // They now run on the same throttled cadence as initializeScheduling().
         if (time() - $lastInitializeScheduling >= $initializeSchedulingIntervalSeconds) {
             $scheduler->addStatusMessage('Starting initializeScheduling', 'debug');
+            $scheduler->purgeBrokenQueueRecords();
+            $scheduler->purgeImplausibleSchedules();
             $scheduler->initializeScheduling();
             $lastInitializeScheduling = time();
         }
