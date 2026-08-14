@@ -145,12 +145,15 @@ class CronScheduler extends \MultiFlexi\Scheduler
                     ->fetch();
 
                 if ($existingJob) {
-                    $this->addStatusMessage('Skipping duplicate job creation for runtemplate #'.$runtemplateData['id'].' at '.$startTime->format('Y-m-d H:i:s').' — job #'.$existingJob['id'].' already pending', 'warning');
+                    $this->addStatusMessage('Runtemplate #'.$runtemplateData['id'].' at '.$startTime->format('Y-m-d H:i:s').' already has pending job #'.$existingJob['id'].', not recreating', 'debug');
 
                     // The job itself is not recreated, but it must still show up in
                     // `multiflexi queue:list` — addJob() is idempotent, so re-queuing
                     // an already-scheduled job is a no-op that just confirms presence.
-                    (new \MultiFlexi\Job((int) $existingJob['id']))->scheduleJobRun($startTime);
+                    // Log at debug only: this runs every daemon tick until the job's
+                    // due time, so at normal verbosity it would flood Graylog/Grafana
+                    // with a line that just restates expected, unchanged state.
+                    (new \MultiFlexi\Job((int) $existingJob['id']))->scheduleJobRun($startTime, 'debug');
 
                     continue;
                 }
