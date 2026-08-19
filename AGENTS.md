@@ -1,4 +1,4 @@
-# WARP.md - Working AI Reference for multiflexi-scheduler
+# AGENTS.md - Working AI Reference for multiflexi-scheduler
 
 ## Project Overview
 **Type**: PHP Project/Debian Package - Systemd Service
