@@ -41,7 +41,7 @@ class CronScheduler extends \MultiFlexi\Scheduler
         foreach ($periodicRuntemplates as $runtemplateData) {
             $companyName = $companyNames[$runtemplateData['company_id']]['name'] ?? $runtemplateData['company_id'];
             LogToSQL::singleton()->setCompany($runtemplateData['company_id']);
-            $this->addStatusMessage('Considering runtemplate #'.$runtemplateData['id'].' '.\MultiFlexi\CronDescriber::describe($runtemplateData['interv'], $runtemplateData['cron']), 'debug');
+            $this->addStatusMessage('Considering runtemplate #'.$runtemplateData['id'].' '.\MultiFlexi\CronDescriber::describe($runtemplateData['interv'], $runtemplateData['cron'] ?? ''), 'debug');
 
             $runtemplate = new \MultiFlexi\RunTemplate();
             $emoji = \MultiFlexi\Scheduler::getIntervalEmoji($runtemplateData['interv']);
