@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f5129ba6396100e832538781cf5817f1",
+    "content-hash": "a7debcb1bbfb340fed3121825a79e61f",
     "packages": [
         {
             "name": "dragonmantank/cron-expression",
@@ -2462,11 +2462,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.x-dev",
+            "version": "2.3.x-dev",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/1081ec4aa13d4d1fabf6711c4cf7c8e2b3ecb6e7",
-                "reference": "1081ec4aa13d4d1fabf6711c4cf7c8e2b3ecb6e7",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/e330f58cd874f1148f01ad164807b5c1de2d04ef",
+                "reference": "e330f58cd874f1148f01ad164807b5c1de2d04ef",
                 "shasum": ""
             },
             "require": {
@@ -2523,26 +2523,26 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-13T17:20:25+00:00"
+            "time": "2026-10-09T14:38:09+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
-            "version": "2.0.x-dev",
+            "version": "2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan-phpunit.git",
-                "reference": "acd7f64264f92084f34a9b8dd49d821dfe9be2d5"
+                "reference": "8d16b8478e523a47f8c02e83bce8981b5b5a3b03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/acd7f64264f92084f34a9b8dd49d821dfe9be2d5",
-                "reference": "acd7f64264f92084f34a9b8dd49d821dfe9be2d5",
+                "url": "https://api.github.com/repos/phpstan/phpstan-phpunit/zipball/8d16b8478e523a47f8c02e83bce8981b5b5a3b03",
+                "reference": "8d16b8478e523a47f8c02e83bce8981b5b5a3b03",
                 "shasum": ""
             },
             "require": {
                 "phar-io/version": "^3.2",
                 "php": "^7.4 || ^8.0",
-                "phpstan/phpstan": "^2.2.6"
+                "phpstan/phpstan": "^2.3.0"
             },
             "conflict": {
                 "phpunit/phpunit": "<7.0"
@@ -2555,7 +2555,6 @@
                 "phpunit/phpunit": "^9.6",
                 "shipmonk/name-collision-detector": "^2.1"
             },
-            "default-branch": true,
             "type": "phpstan-extension",
             "extra": {
                 "phpstan": {
@@ -2580,9 +2579,9 @@
             ],
             "support": {
                 "issues": "https://github.com/phpstan/phpstan-phpunit/issues",
-                "source": "https://github.com/phpstan/phpstan-phpunit/tree/2.0.x"
+                "source": "https://github.com/phpstan/phpstan-phpunit/tree/2.1.1"
             },
-            "time": "2026-08-10T05:58:58+00:00"
+            "time": "2026-10-06T18:12:32+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -6447,7 +6446,6 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "dragonmantank/cron-expression": 20,
-        "phpstan/phpstan-phpunit": 20,
         "vitexsoftware/multiflexi-core": 20
     },
     "prefer-stable": false,
