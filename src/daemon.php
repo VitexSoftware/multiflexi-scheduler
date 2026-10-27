@@ -120,6 +120,21 @@ date_default_timezone_set(DateTimeHelper::getConfiguredTimezoneString());
 $initializeSchedulingIntervalSeconds = (int) \Ease\Shared::cfg('INITIALIZE_SCHEDULING_INTERVAL', 60);
 $lastInitializeScheduling = time();
 
+$shutdown = false;
+
+// Graceful shutdown on SIGTERM / SIGINT: the handler only raises a flag, so the
+// scheduling tick in progress finishes writing its jobs to the database before
+// the loop ends and the process exits; systemd then starts the successor.
+if (\function_exists('pcntl_signal')) {
+    pcntl_async_signals(true);
+    $signalHandler = static function (int $signal) use (&$shutdown): void {
+        error_log(sprintf('Received signal %d — finishing the current scheduling tick, then exiting.', $signal));
+        $shutdown = true;
+    };
+    pcntl_signal(\SIGTERM, $signalHandler);
+    pcntl_signal(\SIGINT, $signalHandler);
+}
+
 do {
     try {
         // initializeScheduling() re-runs the once-at-startup healing check so a
@@ -173,8 +188,18 @@ do {
         $scheduler->addStatusMessage('Error: '.$e->getMessage(), 'error');
     }
 
-    $scheduler->cleanSatatusMessages();
-    sleep(1);
-} while ($daemonize);
+    $scheduler->releaseLogBuffers();
+
+    // Safety net: leave cleanly (systemd Restart=always starts a fresh process)
+    // before memory_limit kills the daemon in the middle of a scheduling tick.
+    if (CronScheduler::memoryExceeded(memory_get_usage(true), CronScheduler::memoryLimitBytes())) {
+        $scheduler->addStatusMessage(sprintf('Memory %s is close to the limit, restarting', formatBytes(memory_get_usage(true))), 'warning');
+        $shutdown = true;
+    }
+
+    if ($daemonize && !$shutdown) {
+        sleep(1);
+    }
+} while ($daemonize && !$shutdown);
 
 $scheduler->logBanner('MultiFlexi Daemon ended');

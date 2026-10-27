@@ -12,7 +12,10 @@ EnvironmentFile=/etc/multiflexi/multiflexi.env
 ExecStart=/usr/bin/php /usr/lib/multiflexi-scheduler/daemon.php
 LimitNOFILE=8192:16384
 Type=simple
-Restart=on-failure
+# Restart also after a clean exit: SIGTERM and the memory safeguard make the
+# daemon finish its current tick and leave, and the successor must be started.
+Restart=always
+TimeoutStopSec=120s
 RestartSec=15s
 
 [Install]

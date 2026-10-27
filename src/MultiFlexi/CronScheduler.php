@@ -178,6 +178,55 @@ class CronScheduler extends \MultiFlexi\Scheduler
     }
 
     /**
+     * Drop every in-memory copy of already-logged messages.
+     *
+     * The daemon runs for days, and Ease\Logger\ToStd (via ToMemory) keeps each
+     * message in a static array that cleanSatatusMessages() does not touch, so
+     * the process eventually hits memory_limit and dies with status 255.
+     */
+    public function releaseLogBuffers(): void
+    {
+        $this->cleanSatatusMessages();
+        \Ease\Logger\ToMemory::$statusMessages = [];
+        \Ease\Shared::$statusMessages = [];
+    }
+
+    /**
+     * Current PHP memory_limit in bytes; 0 when unlimited.
+     */
+    public static function memoryLimitBytes(): int
+    {
+        $limit = trim((string) ini_get('memory_limit'));
+
+        if ($limit === '' || (int) $limit < 0) {
+            return 0;
+        }
+
+        $value = (int) $limit;
+
+        switch (strtolower(substr($limit, -1))) {
+            case 'g':
+                $value *= 1024;
+                // no break
+            case 'm':
+                $value *= 1024;
+                // no break
+            case 'k':
+                $value *= 1024;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Whether usage crossed $ratio of $limit, so the daemon should restart itself cleanly.
+     */
+    public static function memoryExceeded(int $usage, int $limit, float $ratio = 0.75): bool
+    {
+        return $limit > 0 && $usage >= (int) ($limit * $ratio);
+    }
+
+    /**
      * Format bytes into human readable string (KB, MB, GB).
      */
     private static function formatMemory(int $bytes): string
