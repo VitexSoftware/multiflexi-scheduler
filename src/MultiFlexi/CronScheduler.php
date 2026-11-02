@@ -67,6 +67,23 @@ class CronScheduler extends \MultiFlexi\Scheduler
 
             $candidate = $cron->getPreviousRunDate(new \DateTime(), 0, true);
 
+            // A startup delay equal to or longer than the cron period can never
+            // keep the cadence: only one job per runtemplate is pending at a
+            // time, so every 2nd, 3rd... tick would be silently dropped (e.g.
+            // */15 with delay 2460 s ran every 30 min). Keep the phase, drop
+            // the whole periods.
+            $effectiveDelay = self::effectiveDelay($cron, $candidate, $delaySeconds);
+
+            if ($effectiveDelay !== $delaySeconds) {
+                $this->addStatusMessage(sprintf(
+                    'Runtemplate #%d: startup delay %d s is not shorter than the cron period; using %d s to keep the cadence',
+                    $runtemplateData['id'],
+                    $delaySeconds,
+                    $effectiveDelay,
+                ), 'warning');
+                $delaySeconds = $effectiveDelay;
+            }
+
             // job.schedule always stores the launch instant AFTER the startup
             // delay is applied (see below), so the "already handled" check must
             // compare against the same delayed instant — otherwise, for any
@@ -175,6 +192,26 @@ class CronScheduler extends \MultiFlexi\Scheduler
         Task::finalizeExpired();
 
         $this->addStatusMessage('scheduleCronJobs() exit; memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
+    }
+
+    /**
+     * Startup delay that keeps the cron cadence.
+     *
+     * When the delay is not shorter than the gap to the next cron tick, the
+     * launch instant of tick N+1 would lie after the launch of tick N finished,
+     * so ticks get skipped. Returns the delay reduced modulo the period (the
+     * phase is preserved), or the original delay when it already fits.
+     */
+    public static function effectiveDelay(CronExpression $cron, \DateTimeInterface $tick, int $delaySeconds): int
+    {
+        if ($delaySeconds <= 0) {
+            return 0;
+        }
+
+        $next = $cron->getNextRunDate($tick, 0, false);
+        $period = $next->getTimestamp() - $tick->getTimestamp();
+
+        return $period > 0 && $delaySeconds >= $period ? $delaySeconds % $period : $delaySeconds;
     }
 
     /**

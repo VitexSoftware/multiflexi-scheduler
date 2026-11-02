@@ -777,4 +777,28 @@ class CronSchedulerTest extends TestCase
 
         $this->assertNull($state['task_id'], 'custom cron runtemplates must not inherit a stale task_id');
     }
+
+    /**
+     * Regression: cron every 15 min with a 2460 s delay used to run every 30 min because the
+     * delayed launch of one tick finished after the next tick had passed.
+     */
+    public function testEffectiveDelayKeepsPhaseWhenLongerThanCronPeriod(): void
+    {
+        $cron = new CronExpression('*/15 * * * *');
+        $tick = new \DateTime('2026-11-02 11:30:00');
+
+        $this->assertSame(660, CronScheduler::effectiveDelay($cron, $tick, 2460));
+        $this->assertSame(720, CronScheduler::effectiveDelay($cron, $tick, 25920));
+        $this->assertSame(0, CronScheduler::effectiveDelay($cron, $tick, 900), 'whole periods collapse to zero');
+    }
+
+    public function testEffectiveDelayLeavesFittingDelayUntouched(): void
+    {
+        $tick = new \DateTime('2026-11-02 00:00:00');
+
+        $this->assertSame(0, CronScheduler::effectiveDelay(new CronExpression('*/15 * * * *'), $tick, 0));
+        $this->assertSame(600, CronScheduler::effectiveDelay(new CronExpression('*/15 * * * *'), $tick, 600));
+        $this->assertSame(21600, CronScheduler::effectiveDelay(new CronExpression('0 0 * * *'), $tick, 21600), 'daily time-of-day offset');
+        $this->assertSame(57600, CronScheduler::effectiveDelay(new CronExpression('0 0 1 * *'), new \DateTime('2026-11-01 00:00:00'), 57600), 'monthly offset');
+    }
 }
