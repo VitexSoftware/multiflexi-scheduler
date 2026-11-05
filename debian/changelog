@@ -1,4 +1,4 @@
-multiflexi-scheduler (2.2.4) unstable; urgency=low
+multiflexi-scheduler (2.2.4) stable; urgency=low
 
   [ vitex ]
   * Add man page for multiflexi-scheduler (section 8)
@@ -19,7 +19,7 @@ multiflexi-scheduler (2.2.4) unstable; urgency=low
     before finish() could reset it) is not silently dropped from the
     daily cron rotation for the lifetime of the long-running process.
 
- -- Vítězslav Dvořák <info@vitexsoftware.cz>  Fri, 14 Aug 2026 12:00:00 +0200
+ -- Vítězslav Dvořák <info@vitexsoftware.cz>  Thu, 05 Nov 2026 12:57:56 +0100
 
 multiflexi-scheduler (2.2.0) stable; urgency=medium
 
