@@ -173,9 +173,14 @@ distributions.each { distro ->
                     stage('Build ' + distroName) {
                         // -v mounts the node-local tree into the container; the
                         // shared NFS workspace is not used for building at all.
+                        // The worktree's gitdir lives in the node-local mirror,
+                        // which is not mounted into the container, so git must
+                        // run on the host, not inside buildImage.inside().
+                        dir(t.tree) {
+                            sh 'git checkout debian/changelog'
+                        }
                         buildImage.inside('-v ' + t.base + ':' + t.base) {
                             dir(t.tree) {
-                                sh 'git checkout debian/changelog'
                                 def version = sh(
                                     script: 'dpkg-parsechangelog --show-field Version',
                                     returnStdout: true
