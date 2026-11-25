@@ -57,7 +57,7 @@ if ($interval) {
     $runtemplate = new \MultiFlexi\RunTemplate();
     $companyNames = (new Company())->getColumnsFromSQL(['id', 'name'], null, null, 'id');
 
-    $appsForInterval = $runtemplate->getColumnsFromSQL(['id', 'interv', 'delay', 'name', 'executor', 'company_id'], ['interv' => $interval, 'active' => true]);
+    $appsForInterval = $runtemplate->getColumnsFromSQL(['id', 'interv', 'delay', 'name', 'executor', 'company_id', 'app_id'], ['interv' => $interval, 'active' => true]);
 
     foreach ($appsForInterval as $runtemplateData) {
         $companyName = $companyNames[$runtemplateData['company_id']]['name'] ?? $runtemplateData['company_id'];
@@ -65,6 +65,15 @@ if ($interval) {
 
         if (strtolower(Shared::cfg('APP_DEBUG', 'false')) === 'true') {
             $jobber->addStatusMessage($emoji.' '.sprintf(_('%s Scheduler interval %s begin'), $companyName, \MultiFlexi\Scheduler::$intervCron[$interval].' ('.$interval.')'), 'debug');
+        }
+
+        $runtemplate->setData($runtemplateData);
+        $denial = $runtemplate->automaticRunDenial();
+
+        if ($denial !== null) {
+            $jobber->addStatusMessage(sprintf(_('RunTemplate #%d is not scheduled: %s'), $runtemplateData['id'], $denial), 'warning');
+
+            continue;
         }
 
         $startTime = new \DateTime();

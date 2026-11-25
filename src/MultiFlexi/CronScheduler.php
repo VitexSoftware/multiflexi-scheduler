@@ -24,6 +24,13 @@ use Cron\CronExpression;
  */
 class CronScheduler extends \MultiFlexi\Scheduler
 {
+    /**
+     * RunTemplates currently not scheduled, with the reason last logged.
+     *
+     * @var array<int, string>
+     */
+    private array $denied = [];
+
     public function scheduleCronJobs(): void
     {
         $this->addStatusMessage('scheduleCronJobs() entry; memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
@@ -41,6 +48,21 @@ class CronScheduler extends \MultiFlexi\Scheduler
         foreach ($periodicRuntemplates as $runtemplateData) {
             $companyName = $companyNames[$runtemplateData['company_id']]['name'] ?? $runtemplateData['company_id'];
             LogToSQL::singleton()->setCompany($runtemplateData['company_id']);
+
+            $denial = $this->denialReason($runtemplateData);
+
+            if ($denial !== null) {
+                // This runs on every daemon tick: log a warning only when the state changes
+                if (($this->denied[$runtemplateData['id']] ?? null) !== $denial) {
+                    $this->addStatusMessage(sprintf(_('RunTemplate #%d is not scheduled: %s'), $runtemplateData['id'], $denial), 'warning');
+                }
+
+                $this->denied[$runtemplateData['id']] = $denial;
+
+                continue;
+            }
+
+            unset($this->denied[$runtemplateData['id']]);
             $this->addStatusMessage('Considering runtemplate #'.$runtemplateData['id'].' '.\MultiFlexi\CronDescriber::describe($runtemplateData['interv'], $runtemplateData['cron'] ?? ''), 'debug');
 
             $runtemplate = new \MultiFlexi\RunTemplate();
@@ -192,6 +214,21 @@ class CronScheduler extends \MultiFlexi\Scheduler
         Task::finalizeExpired();
 
         $this->addStatusMessage('scheduleCronJobs() exit; memory: '.self::formatMemory(memory_get_usage(true)), 'debug');
+    }
+
+    /**
+     * Why a RunTemplate must not be scheduled (disabled company or application).
+     *
+     * @param array<string, mixed> $runtemplateData
+     *
+     * @return null|string reason, null when it may be scheduled
+     */
+    protected function denialReason(array $runtemplateData): ?string
+    {
+        $runtemplate = new \MultiFlexi\RunTemplate();
+        $runtemplate->setData($runtemplateData);
+
+        return $runtemplate->automaticRunDenial();
     }
 
     /**

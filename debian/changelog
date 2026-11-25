@@ -1,3 +1,9 @@
+multiflexi-scheduler (2.2.5) unstable; urgency=medium
+
+  * Do not schedule RunTemplates of a disabled application or company.
+
+ -- vitex <info@vitexsoftware.cz>  Wed, 25 Nov 2026 02:30:00 +0100
+
 multiflexi-scheduler (2.2.4) stable; urgency=low
 
   [ vitex ]
